@@ -425,7 +425,7 @@
       </div>
 
       <!-- Content -->
-      <main class="flex-1 min-h-0 overflow-y-auto">
+      <main ref="scrollContainer" class="flex-1 min-h-0 overflow-y-auto">
         <div class="px-3 sm:px-6 py-4 sm:py-6">
           <slot />
         </div>
@@ -459,6 +459,44 @@ const sidebarOpen = ref(false);
 const userMenuOpen = ref(false);
 const notifOpen = ref(false);
 
+// scroll container จริง
+const scrollContainer = ref<HTMLElement | null>(null);
+const isFirstRoute = ref(true);
+
+const scrollToTopAndWait = () => {
+  return new Promise<void>((resolve) => {
+    if (!scrollContainer.value) return resolve();
+
+    const el = scrollContainer.value;
+
+    const done = () => {
+      el.removeEventListener("scroll", onScroll);
+      resolve();
+    };
+
+    const onScroll = () => {
+      if (el.scrollTop === 0) {
+        done();
+      }
+    };
+
+    el.addEventListener("scroll", onScroll);
+
+    // ถ้าตอนนี้อยู่ top อยู่แล้ว ก็จบเลย
+    if (el.scrollTop === 0) {
+      done();
+      return;
+    }
+
+    el.scrollTo({ top: 0, behavior: "smooth" });
+  });
+};
+
+// เลื่อนขึ้นบนสุดแบบ smooth
+const scrollToTopSmooth = () => {
+  scrollContainer.value?.scrollTo({ top: 0, behavior: "smooth" });
+};
+
 const syncActiveWithRoute = () => {
   const i = sidebarMenu.value.findIndex(
     (i) => !i.external && i.to === route.path
@@ -466,20 +504,45 @@ const syncActiveWithRoute = () => {
   if (i !== -1) nav.setActive(i);
 };
 
-const handleNavClick = (index: number, item: menu) => {
+const handleNavClick = async (index: number, item: menu) => {
   if (item.external) {
     if (import.meta.client) {
       window.open(item.to, "_self");
     }
     return;
   }
+
+  const isSameRoute = nav.activeIndex === index && route.path === item.to;
+
+  if (isSameRoute) {
+    if (import.meta.client) {
+      await scrollToTopAndWait(); // ✅ รอให้เลื่อนจบก่อน
+    }
+
+    await refreshNuxtData(); // แล้วค่อย refresh
+    return;
+  }
+
   nav.setActive(index);
 };
 
+// เมื่อ route/path เปลี่ยน → ค่อยเลื่อน container ขึ้นบนสุดแบบ smooth
 watch(
   () => route.path,
-  async (newPath) => {
+  async () => {
     syncActiveWithRoute();
+
+    // skip ครั้งแรกตอนเข้าแอป (ไม่ต้องเลื่อนอะไร)
+    if (isFirstRoute.value) {
+      isFirstRoute.value = false;
+      return;
+    }
+
+    await nextTick(); // รอให้เนื้อหาใหม่เริ่ม mount ก่อนนิดนึง
+
+    if (import.meta.client) {
+      scrollToTopSmooth();
+    }
   },
   { immediate: true }
 );

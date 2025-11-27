@@ -8,7 +8,7 @@
         :to="`/customer/task/${task.id}`"
         class="relative grid grid-cols-[1fr,auto] items-stretch gap-2.5 rounded-[22px] bg-white px-3.5 py-3 text-inherit shadow-[0_14px_34px_rgba(15,23,42,0.08)] no-underline transition-transform transition-shadow active:scale-[0.985] active:shadow-[0_10px_22px_rgba(15,23,42,0.16)]"
       >
-        <!-- center content (เหลือแค่ส่วนนี้) -->
+        <!-- center content -->
         <div class="flex flex-col gap-1">
           <p
             v-if="task.schoolName"
@@ -16,10 +16,21 @@
           >
             {{ task.schoolName }}
           </p>
+
           <div class="flex items-baseline justify-between gap-2">
-            <p class="text-[13px] font-semibold text-gray-900">
-              หมายเลข {{ task.ticket }}
-            </p>
+            <div class="flex items-baseline gap-1.5">
+              <p class="text-[13px] font-semibold text-gray-900">
+                หมายเลข {{ task.ticket }}
+              </p>
+              <span
+                v-if="task.isMine && isCustomer"
+                class="rounded-full border border-emerald-100 bg-emerald-50 px-1.5 py-[1px] text-[10px] font-medium text-emerald-700"
+              >
+                ของฉัน
+              </span>
+            </div>
+
+            <!-- ขวา: เวลาอัปเดต เหมือนเดิม -->
             <p class="text-[11px] text-gray-400">
               {{ formatUpdatedAt(task.updatedAt) }}
             </p>
@@ -27,7 +38,7 @@
 
           <div class="mt-0.5 flex flex-wrap gap-x-3 gap-y-1.5">
             <div
-            v-if="task.room"
+              v-if="task.room"
               class="inline-flex items-center gap-1 text-[11px] text-gray-600"
             >
               <MapPin class="h-3.5 w-3.5" />
@@ -62,7 +73,7 @@
               <span>{{ task.commentsCount }}</span>
             </div>
 
-            <!-- ⭐ rating: ขึ้นเฉพาะงานที่ให้คะแนนได้ -->
+            <!-- ⭐ rating -->
             <div
               v-if="task.canRate"
               class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]"
@@ -80,7 +91,6 @@
                     : 'text-slate-400'
                 "
               />
-              <!-- ถ้าให้แล้ว โชว์คะแนน เช่น 4/5, ถ้ายังไม่ให้ใช้คำสั้น ๆ -->
               <span v-if="task.rating">{{ task.rating }}/5</span>
               <span v-else>รอคะแนน</span>
             </div>
@@ -90,15 +100,9 @@
             {{ task.description }}
           </p>
 
-          <!-- เส้นตาย / วันที่กำหนดแล้วเสร็จ สีแดง -->
           <p class="mt-1 text-[11px] font-semibold text-red-500">
             กำหนดแล้วเสร็จ: {{ formatDueDate(task.dueDate) }}
           </p>
-
-          <!-- <p class="text-[11px] font-semibold text-red-500">
-            วันที่กำหนดแล้วเสร็จ (ในเวลาทำการ) : {{ formatDueDate(task.dueDate) }}
-          </p> -->
-
         </div>
 
         <!-- arrow -->
@@ -132,11 +136,14 @@ import {
   Video,
   MessageCircle,
   Star,
+  User,
 } from "lucide-vue-next";
 import { formatDueDate, formatUpdatedAt } from "@/utils/date";
 import type { Task, TaskStatus } from "@/types/task";
+
 defineProps<{
   TaskData: Task[];
+  isCustomer: boolean;
 }>();
 
 const statusShort = (status: TaskStatus) => {
@@ -148,5 +155,3 @@ const statusShort = (status: TaskStatus) => {
   }
 };
 </script>
-
-<style scoped></style>

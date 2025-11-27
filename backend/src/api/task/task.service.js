@@ -34,6 +34,7 @@ async function taskStatuses(ctx) {
       );
       const data = {
         id: row.STT_JOBNO ?? row.JOB_NO,
+        ...(row.ORDERING ? { isMine: row.ORDERING === 1 } : {}),
         ...(row.CUSTNAME ? { schoolName: row.CUSTNAME } : {}),
         ticket: row.STT_TAR_NO,
         room: row.STT_ROOM_NO,

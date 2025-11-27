@@ -3,6 +3,7 @@ export type FilterKey = "all" | "in_progress" | "done";
 
 export interface Task {
   id: string;
+  isMine?: boolean;
   schoolName?: string;
   ticket: string;
   room: string;

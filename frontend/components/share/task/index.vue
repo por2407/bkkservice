@@ -6,19 +6,17 @@
   >
     <!-- top header / hero -->
     <TasksHeader :taskCount="filteredTasks.length">
-      <!-- ใช้การ์ดด้านบนเป็นตัวกรอง -->
-      <div class="grid grid-cols-3 gap-2">
+      <div class="flex justify-center gap-2">
         <!-- in_progress -->
         <button
           type="button"
           @click="selectedFilter = 'in_progress'"
-          :class="[
-            'flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 backdrop-blur transition active:scale-[0.98]',
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
+          :class="
             selectedFilter === 'in_progress'
               ? filterStyles.in_progress
-              : 'bg-white/10 text-emerald-50/90 opacity-80',
-          ]"
-          class="border-2 border-white/70"
+              : 'bg-white/10 text-emerald-50/90 opacity-80'
+          "
         >
           <Clock class="h-5 w-5" />
           <div>
@@ -31,13 +29,12 @@
         <button
           type="button"
           @click="selectedFilter = 'done'"
-          :class="[
-            'flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 backdrop-blur transition active:scale-[0.98]',
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
+          :class="
             selectedFilter === 'done'
               ? filterStyles.done
-              : 'bg-white/10 text-emerald-50/90 opacity-80',
-          ]"
-          class="border-2 border-white/70"
+              : 'bg-white/10 text-emerald-50/90 opacity-80'
+          "
         >
           <CheckCircle2 class="h-5 w-5" />
           <div>
@@ -48,15 +45,15 @@
 
         <!-- all -->
         <button
+          v-if="isAll"
           type="button"
           @click="selectedFilter = 'all'"
-          :class="[
-            'flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 backdrop-blur transition active:scale-[0.98]',
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
+          :class="
             selectedFilter === 'all'
               ? filterStyles.all
-              : 'bg-white/10 text-emerald-50/90 opacity-80',
-          ]"
-          class="border-2 border-white/70"
+              : 'bg-white/10 text-emerald-50/90 opacity-80'
+          "
         >
           <ClipboardList class="h-5 w-5" />
           <div>
@@ -69,7 +66,7 @@
 
     <!-- search box แบบ sticky + พื้นหลังเทาเต็มกว้าง + ชิดบนสุดตอนเลื่อน -->
     <!-- ใช้ -top-3 ให้ทับ padding-top ของ main#app-scroll (0.75rem) -->
-    <section class="sticky -top-3 z-30">
+    <section :class="isMobile ? 'sticky -top-3 z-30' : ''">
       <div
         class="-mx-4"
         :class="
@@ -114,6 +111,7 @@
     <TaskList
       v-if="!loading && filteredTasks.length > 0"
       :TaskData="visibleTasks"
+      :isCustomer="isCustomer"
     />
 
     <!-- sentinel สำหรับ infinite scroll (อยู่ท้าย list เสมอ แต่ซ่อน/โชว์ด้วย v-show) -->
@@ -174,14 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ClipboardList,
-  Clock,
-  CheckCircle2,
-  Search,
-  X,
-  ChevronUp,
-} from "lucide-vue-next";
+import { ClipboardList, Clock, CheckCircle2, Search, X } from "lucide-vue-next";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import TasksHeader from "@/components/share/task/TasksHeader.vue";
 import TaskList from "@/components/share/task/TaskList.vue";
@@ -193,6 +184,8 @@ const authStore = useAuthStore();
 const { isMobile } = storeToRefs(authStore);
 
 const { headerRef, showStickyHeader } = useStickyHeader(isMobile);
+const isAll = computed(() => !!(authStore.user?.userType !== "e"));
+const isCustomer = computed(() => !!(authStore.user?.userType === "c"));
 
 const {
   selectedFilter,
@@ -247,7 +240,6 @@ onBeforeUnmount(() => {
     observer = null;
   }
 });
-
 </script>
 
 <style scoped>
