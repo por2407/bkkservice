@@ -170,18 +170,6 @@
       />
       <p class="text-[12px]">ไม่พบงานในขณะนี้</p>
     </section>
-
-    <!-- ปุ่มเลื่อนขึ้นบนสุด (floating) -->
-    <button
-      v-show="showScrollTop"
-      type="button"
-      @click="scrollToTop"
-      class="fixed right-4 z-40 rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 p-3 active:scale-95"
-      :style="{ bottom: scrollTopButtonBottom }"
-      aria-label="เลื่อนขึ้นด้านบนสุด"
-    >
-      <ChevronUp class="w-5 h-5" />
-    </button>
   </div>
 </template>
 
@@ -221,60 +209,29 @@ const {
   loadMore,
 } = useTaskList();
 
+// ref สำหรับ sentinel element
 const infiniteScrollTrigger = ref<HTMLElement | null>(null);
-const scrollContainer = ref<HTMLElement | null>(null);
-const showScrollTop = ref(false);
-
-// มี input / textarea / contenteditable โฟกัสอยู่ไหม
-const isAnyInputFocused = ref(false);
-
-// ✅ bottom ของปุ่ม scroll-top: ปกติ 120px, ถ้ามี input โฟกัสเหลือ 88px
-const scrollTopButtonBottom = computed(() =>
-  `calc(${isAnyInputFocused.value ? 88 : 120}px + env(safe-area-inset-bottom))`
-);
-
-const isEditableElement = (el: HTMLElement | null) => {
-  if (!el) return false;
-  const tag = el.tagName;
-  if (tag === "INPUT" || tag === "TEXTAREA") return true;
-  if (el.isContentEditable) return true;
-  return false;
-};
-
-
 let observer: IntersectionObserver | null = null;
-let scrollHandler: ((e: Event) => void) | null = null;
-let focusInHandler: ((e: FocusEvent) => void) | null = null;
-let focusOutHandler: ((e: FocusEvent) => void) | null = null;
 
 onMounted(() => {
-  scrollContainer.value = document.getElementById(
-    "app-scroll"
-  ) as HTMLElement | null;
-
-  if (scrollContainer.value) {
-    scrollHandler = () => {
-      showScrollTop.value = scrollContainer.value!.scrollTop > 300;
-    };
-    scrollContainer.value.addEventListener("scroll", scrollHandler, {
-      passive: true,
-    });
+  // กันเผื่อ browser / webview แปลก ๆ ไม่รองรับ IO
+  if (!("IntersectionObserver" in window)) {
+    return;
   }
-
-  if (!("IntersectionObserver" in window)) return;
 
   observer = new IntersectionObserver(
     (entries) => {
       const entry = entries[0];
       if (!entry) return;
 
+      // ถ้า sentinel โผล่ใน viewport + ยังมีให้โหลด + ไม่ได้อยู่ระหว่างโหลด
       if (entry.isIntersecting && canLoadMore.value && !loading.value) {
         loadMore();
       }
     },
     {
-      root: scrollContainer.value ?? null,
-      rootMargin: "0px 0px 200px 0px",
+      root: null, // ใช้ viewport ปัจจุบัน (ใน webview ก็โอเค)
+      rootMargin: "0px 0px 200px 0px", // preload ก่อนถึงจริงนิดหน่อย (กันชน bottom nav)
       threshold: 0.1,
     }
   );
@@ -282,28 +239,6 @@ onMounted(() => {
   if (infiniteScrollTrigger.value) {
     observer.observe(infiniteScrollTrigger.value);
   }
-
-  // ✅ จับ focus/blur ทุก input/textarea/contenteditable ทั่วหน้า
-  focusInHandler = (e: FocusEvent) => {
-    const target = e.target as HTMLElement | null;
-    if (isEditableElement(target)) {
-      isAnyInputFocused.value = true;
-    }
-  };
-
-  focusOutHandler = (e: FocusEvent) => {
-    const target = e.target as HTMLElement | null;
-    if (isEditableElement(target)) {
-      // เช็ค activeElement อีกที เผื่อโฟกัสย้ายไปช่องอื่น
-      setTimeout(() => {
-        const active = document.activeElement as HTMLElement | null;
-        isAnyInputFocused.value = isEditableElement(active);
-      }, 0);
-    }
-  };
-
-  document.addEventListener("focusin", focusInHandler);
-  document.addEventListener("focusout", focusOutHandler);
 });
 
 onBeforeUnmount(() => {
@@ -311,25 +246,16 @@ onBeforeUnmount(() => {
     observer.disconnect();
     observer = null;
   }
-  if (scrollContainer.value && scrollHandler) {
-    scrollContainer.value.removeEventListener("scroll", scrollHandler);
-  }
 });
 
-const scrollToTop = () => {
-  if (scrollContainer.value) {
-    scrollContainer.value.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-};
 </script>
 
 <style scoped>
+/* สปินเนอร์เล็ก ๆ ข้างข้อความ */
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2.5px solid rgba(16, 185, 129, 0.25);
+  border: 2.5px solid rgba(16, 185, 129, 0.25); /* emerald-500 แบบจาง */
   border-top-color: rgba(16, 185, 129, 0.9);
   border-radius: 50%;
   display: inline-block;
@@ -342,6 +268,7 @@ const scrollToTop = () => {
   }
 }
 
+/* skeleton shimmer */
 .skeleton-card {
   position: relative;
   overflow: hidden;

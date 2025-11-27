@@ -158,6 +158,7 @@
 import { useSidebarMenu } from "@/composables/sidebar/sidebarItem"
 import { useNavStore } from "@/stores/nav.stores"
 import type { menu } from "@/types/sidebar"
+import { refreshNuxtData } from "#app"
 
 const route = useRoute();
 const { sidebarMenu } = useSidebarMenu();
@@ -186,11 +187,27 @@ const syncActiveWithRoute = () => {
   if (i !== -1) nav.setActive(i);
 };
 
-const handleNavClick = (index: number, item: menu) => {
+const handleNavClick = async (index: number, item: menu) => {
   if (item.external) {
     if (import.meta.client) window.open(item.to, "_self");
     return;
   }
+
+  const isSameRoute =
+    nav.activeIndex === index &&
+    route.path === item.to;
+
+  if (isSameRoute) {
+    // แค่เลื่อนขึ้นบนสุด
+    if (import.meta.client) {
+      scrollToTopSmooth();
+    }
+
+    await refreshNuxtData();
+
+    return;
+  }
+
   nav.setActive(index);
   // *** ไม่เลื่อนตรงนี้แล้ว ปล่อยให้เลื่อนตอน route เปลี่ยนแทน ***
 };
