@@ -1,5 +1,5 @@
 <template>
-  <!-- พื้นหลังสุด เปลี่ยนสีตามตัวกรอง (โทนอ่อน / pastel) -->
+  <!-- กล่องหลัก มี padding ครบในตัว -->
   <div
     class="min-h-screen px-4 pt-4 pb-6 transition-colors duration-300"
     :class="pageBgClass"
@@ -67,8 +67,10 @@
       </div>
     </TasksHeader>
 
-    <!-- search box -->
-    <section class="mt-3">
+    <!-- search box แบบ sticky (ตัวเดียว ไม่ใช้ StickyHeader แล้ว) -->
+    <section
+      class="sticky top-0 z-30 pt-2 pb-2 "
+    >
       <div class="relative">
         <!-- icon ซ้าย -->
         <span
@@ -207,7 +209,7 @@ const {
 
 // ref สำหรับ sentinel element (infinite scroll)
 const infiniteScrollTrigger = ref<HTMLElement | null>(null);
-// container ที่เลื่อนจริง (main#app-scroll)
+// container ที่เลื่อนจริง (main#app-scroll ใน layout)
 const scrollContainer = ref<HTMLElement | null>(null);
 // state สำหรับปุ่มขึ้นบนสุด
 const showScrollTop = ref(false);
@@ -217,7 +219,9 @@ let scrollHandler: ((e: Event) => void) | null = null;
 
 onMounted(() => {
   // หา scroll container (main ใน layout)
-  scrollContainer.value = document.getElementById("app-scroll") as HTMLElement | null;
+  scrollContainer.value = document.getElementById(
+    "app-scroll"
+  ) as HTMLElement | null;
 
   if (scrollContainer.value) {
     scrollHandler = () => {
@@ -245,7 +249,8 @@ onMounted(() => {
       }
     },
     {
-      root: null,
+      // ใช้ scroll container เป็น root จะนิ่งดีใน app ที่เป็น webview
+      root: scrollContainer.value ?? null,
       rootMargin: "0px 0px 200px 0px",
       threshold: 0.1,
     }
