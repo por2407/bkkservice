@@ -159,50 +159,62 @@ import { useSidebarMenu } from "@/composables/sidebar/sidebarItem"
 import { useNavStore } from "@/stores/nav.stores"
 import type { menu } from "@/types/sidebar"
 
-const route = useRoute()
-const { sidebarMenu } = useSidebarMenu()
-const nav = useNavStore()
+const route = useRoute();
+const { sidebarMenu } = useSidebarMenu();
+const nav = useNavStore();
 
-// container ที่เลื่อนจริง
+// scroll container จริง
 const scrollContainer = ref<HTMLElement | null>(null);
+const isFirstRoute = ref(true);
 
 onMounted(() => {
   scrollContainer.value = document.getElementById("app-scroll") as HTMLElement | null;
 });
 
-// ฟังก์ชันรีเซ็ต scroll ให้อยู่บนสุด
-const resetScrollTop = () => {
+// เลื่อนขึ้นบนสุดแบบ smooth
+const scrollToTopSmooth = () => {
   if (!scrollContainer.value) {
     scrollContainer.value = document.getElementById("app-scroll") as HTMLElement | null;
   }
-  scrollContainer.value?.scrollTo({ top: 0, behavior: "auto" });
+  scrollContainer.value?.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const syncActiveWithRoute = () => {
   const i = sidebarMenu.value.findIndex(
     (m) => !m.external && m.to === route.path
-  )
-  if (i !== -1) nav.setActive(i)
-}
+  );
+  if (i !== -1) nav.setActive(i);
+};
 
 const handleNavClick = (index: number, item: menu) => {
   if (item.external) {
-    if (import.meta.client) window.open(item.to, "_self")
-    return
+    if (import.meta.client) window.open(item.to, "_self");
+    return;
   }
-  nav.setActive(index)
+  nav.setActive(index);
+  // *** ไม่เลื่อนตรงนี้แล้ว ปล่อยให้เลื่อนตอน route เปลี่ยนแทน ***
+};
 
-  // รีเซ็ต scroll ทุกครั้งที่เปลี่ยนเมนู
-  if (import.meta.client) {
-    resetScrollTop();
-  }
-}
-
+// เมื่อ route/path เปลี่ยน → ค่อยเลื่อน container ขึ้นบนสุดแบบ smooth
 watch(
   () => route.path,
-  () => syncActiveWithRoute(),
+  async () => {
+    syncActiveWithRoute();
+
+    // skip ครั้งแรกตอนเข้าแอป (ไม่ต้องเลื่อนอะไร)
+    if (isFirstRoute.value) {
+      isFirstRoute.value = false;
+      return;
+    }
+
+    await nextTick(); // รอให้เนื้อหาใหม่เริ่ม mount ก่อนนิดนึง
+
+    if (import.meta.client) {
+      scrollToTopSmooth();
+    }
+  },
   { immediate: true }
-)
+);
 </script>
 
 <style scoped>
