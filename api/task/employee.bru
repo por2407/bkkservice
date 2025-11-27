@@ -1,0 +1,23 @@
+meta {
+  name: employee
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3001/api/tasks/list
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "userCode": "560170",
+    "userType": "e"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,319 @@
+<template>
+  <!-- top header / hero -->
+  <section
+    class="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-emerald-600 via-emerald-500 to-emerald-400 px-4 pt-4 pb-[18px] text-emerald-50 shadow-sm"
+  >
+    <h1 class="mt-1 text-[20px] font-bold leading-snug">รายการแจ้งงาน</h1>
+    <p class="mb-3 mt-0.5 text-[12px] leading-relaxed text-emerald-50/95">
+      ดูสถานะงานที่ลูกค้าแจ้งทั้งหมด แตะเพื่อเปิดรายละเอียดและอัปเดตได้ทันที
+    </p>
+
+    <!-- ใช้การ์ดด้านบนเป็นตัวกรอง -->
+    <div class="grid grid-cols-3 gap-2">
+      <!-- all -->
+      <button
+        type="button"
+        @click="selectedFilter = 'all'"
+        :class="[
+          'flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 backdrop-blur transition active:scale-[0.98]',
+          selectedFilter === 'all'
+            ? filterStyles.all
+            : 'bg-white/10 text-emerald-50/90 opacity-80',
+        ]"
+      >
+        <ClipboardList class="h-5 w-5" />
+        <div>
+          <p class="text-[10px] opacity-90">งานทั้งหมด</p>
+          <p class="text-[15px] font-bold">{{ totalTasks }}</p>
+        </div>
+      </button>
+
+      <!-- in_progress -->
+      <button
+        type="button"
+        @click="selectedFilter = 'in_progress'"
+        :class="[
+          'flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 backdrop-blur transition active:scale-[0.98]',
+          selectedFilter === 'in_progress'
+            ? filterStyles.in_progress
+            : 'bg-white/10 text-emerald-50/90 opacity-80',
+        ]"
+      >
+        <AlertCircle class="h-5 w-5" />
+        <div>
+          <p class="text-[10px] opacity-90">กำลังดำเนินการ</p>
+          <p class="text-[15px] font-bold">{{ inProgressCount }}</p>
+        </div>
+      </button>
+
+      <!-- done -->
+      <button
+        type="button"
+        @click="selectedFilter = 'done'"
+        :class="[
+          'flex items-center gap-1.5 rounded-2xl px-2.5 py-1.5 backdrop-blur transition active:scale-[0.98]',
+          selectedFilter === 'done'
+            ? filterStyles.done
+            : 'bg-white/10 text-emerald-50/90 opacity-80',
+        ]"
+      >
+        <Clock class="h-5 w-5" />
+        <div>
+          <p class="text-[10px] opacity-90">เสร็จแล้ว</p>
+          <p class="text-[15px] font-bold">{{ doneCount }}</p>
+        </div>
+      </button>
+    </div>
+
+    <p class="mt-2 text-[11px] text-emerald-50/80">
+      กำลังแสดง {{ filteredTasks.length }} งานตามตัวกรอง
+    </p>
+  </section>
+
+  <!-- list -->
+  <section class="mt-3">
+    <div class="flex flex-col gap-2.5 pb-1">
+      <NuxtLink
+        v-for="task in filteredTasks"
+        :key="task.id"
+        :to="`/task/${task.id}`"
+        class="relative grid grid-cols-[auto,1fr,auto] items-stretch gap-2.5 rounded-[22px] bg-white px-3.5 py-3 text-inherit shadow-[0_14px_34px_rgba(15,23,42,0.08)] no-underline transition-transform transition-shadow active:scale-[0.985] active:shadow-[0_10px_22px_rgba(15,23,42,0.16)]"
+      >
+        <div class="flex flex-col items-center gap-1.5 pr-1">
+          <div
+            class="flex h-[38px] w-[38px] items-center justify-center rounded-2xl"
+            :class="{
+              'bg-amber-500 text-white': task.status === 'in_progress',
+              'bg-emerald-500 text-white': task.status === 'done',
+            }"
+          >
+            <Tag class="h-4 w-4" />
+          </div>
+
+          <span
+            class="text-[9px]"
+            :class="{
+              'text-amber-600': task.status === 'in_progress',
+              'text-emerald-600': task.status === 'done',
+            }"
+          >
+            {{ statusLabel(task.status) }}
+          </span>
+        </div>
+
+        <!-- center content -->
+        <div class="flex flex-col gap-1">
+          <div class="flex items-baseline justify-between gap-2">
+            <p class="text-[13px] font-semibold text-gray-900">
+              หมายเลข {{ task.ticket }}
+            </p>
+            <p class="text-[11px] text-gray-400">
+              {{ formatUpdatedAt(task.updatedAt) }}
+            </p>
+          </div>
+
+          <div class="mt-0.5 flex flex-wrap gap-x-3 gap-y-1.5">
+            <div
+              class="inline-flex items-center gap-1 text-[11px] text-gray-600"
+            >
+              <MapPin class="h-3.5 w-3.5" />
+              <span>ห้อง {{ task.room }}</span>
+            </div>
+
+            <div
+              class="inline-flex items-center gap-1 text-[11px] text-gray-600"
+            >
+              <CheckCircle2
+                v-if="task.status === 'done'"
+                class="h-3.5 w-3.5 text-emerald-600"
+              />
+              <Clock v-else class="h-3.5 w-3.5 text-amber-600" />
+              <span>{{ statusShort(task.status) }}</span>
+            </div>
+
+            <div
+              v-if="task.hasImage"
+              class="inline-flex items-center gap-1 text-[11px] text-sky-600"
+            >
+              <ImageIcon class="h-3.5 w-3.5" />
+              <span>มีรูปภาพ</span>
+            </div>
+          </div>
+
+          <p class="mt-1 text-[12px] leading-snug text-gray-600">
+            {{ task.description }}
+          </p>
+        </div>
+
+        <!-- arrow -->
+        <div class="flex items-center justify-center text-gray-400">
+          <ChevronRight class="h-4 w-4" />
+        </div>
+      </NuxtLink>
+
+      <p
+        v-if="filteredTasks.length === 0"
+        class="pt-3 pb-1 text-center text-[12px] text-gray-400"
+      >
+        ยังไม่พบงานในสถานะนี้
+      </p>
+    </div>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import {
+  ClipboardList,
+  Tag,
+  ChevronRight,
+  MapPin,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  Image as ImageIcon,
+} from "lucide-vue-next";
+
+type TaskStatus = "in_progress" | "done";
+
+interface Task {
+  id: string;
+  ticket: string;
+  room: string;
+  description: string;
+  status: TaskStatus;
+  updatedAt: string; // ISO string เช่น "2025-11-01T10:36:05+07:00"
+  hasImage?: boolean;
+}
+
+const allTasks: Task[] = [
+  {
+    id: "TSK-0001",
+    ticket: "TSK-0001",
+    room: "1205",
+    description: "แอร์ไม่เย็น มีเสียงดังตอนเปิดโหมดเย็น ขอช่างเช็กด่วน",
+    status: "in_progress",
+    updatedAt: "2025-11-13T09:24:00+07:00",
+    hasImage: true,
+  },
+  {
+    id: "TSK-0002",
+    ticket: "TSK-0002",
+    room: "803",
+    description: "ไฟในห้องน้ำไม่ติด อาจเป็นที่เบรกเกอร์",
+    status: "in_progress",
+    updatedAt: "2025-11-13T08:10:00+07:00",
+    hasImage: false,
+  },
+  {
+    id: "TSK-0003",
+    ticket: "TSK-0003",
+    room: "1502",
+    description: "ประตูระเบียงปิดไม่สนิท มีเสียงลมแรงตอนกลางคืน",
+    status: "in_progress",
+    updatedAt: "2025-11-12T15:32:00+07:00",
+    hasImage: true,
+  },
+  {
+    id: "TSK-0004",
+    ticket: "TSK-0004",
+    room: "607",
+    description: "เปลี่ยนรีโมตทีวี ลูกค้าทำตกแล้วใช้งานไม่ได้",
+    status: "done",
+    updatedAt: "2025-11-12T10:18:00+07:00",
+    hasImage: false,
+  },
+  {
+    id: "TSK-0005",
+    ticket: "TSK-0005",
+    room: "302",
+    description: "ฝักบัวรั่ว น้ำกระเด็นออกนอกโซนอาบน้ำ",
+    status: "in_progress",
+    updatedAt: "2025-11-11T18:42:00+07:00",
+    hasImage: false,
+  },
+];
+
+type FilterKey = "all" | "in_progress" | "done";
+
+const filterStyles: Record<FilterKey, string> = {
+  // ใช้โทนสีเดียวกับตัวกรองเดิม
+  all: "bg-blue-400 text-white shadow-sm ring-1 ring-white/60",
+  in_progress: "bg-amber-500 text-white shadow-sm ring-1 ring-white/60",
+  done: "bg-emerald-600 text-white shadow-sm ring-1 ring-white/60",
+};
+
+const selectedFilter = ref<FilterKey>("all");
+
+const filteredTasks = computed(() => {
+  if (selectedFilter.value === "all") return allTasks;
+  return allTasks.filter((t) => t.status === selectedFilter.value);
+});
+
+const totalTasks = allTasks.length;
+const inProgressCount = allTasks.filter(
+  (t) => t.status === "in_progress"
+).length;
+const doneCount = allTasks.filter((t) => t.status === "done").length;
+
+const statusLabel = (status: TaskStatus) => {
+  switch (status) {
+    case "in_progress":
+      return "กำลังดำเนินการ";
+    case "done":
+      return "ดำเนินการเสร็จแล้ว";
+  }
+};
+
+const statusShort = (status: TaskStatus) => {
+  switch (status) {
+    case "in_progress":
+      return "กำลังทำ";
+    case "done":
+      return "เสร็จแล้ว";
+  }
+};
+
+const thaiMonthsShort = [
+  "ม.ค.",
+  "ก.พ.",
+  "มี.ค.",
+  "เม.ย.",
+  "พ.ค.",
+  "มิ.ย.",
+  "ก.ค.",
+  "ส.ค.",
+  "ก.ย.",
+  "ต.ค.",
+  "พ.ย.",
+  "ธ.ค.",
+];
+
+const formatUpdatedAt = (isoString: string) => {
+  const date = new Date(isoString);
+  const now = new Date();
+
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const timePart = `${hours}:${minutes}`;
+
+  if (diffDays === 0) {
+    return `วันนี้ · ${timePart}`;
+  }
+  if (diffDays === 1) {
+    return `เมื่อวาน · ${timePart}`;
+  }
+  if (diffDays <= 7) {
+    return `${diffDays} วันก่อน · ${timePart}`;
+  }
+
+  const d = date.getDate().toString().padStart(2, "0");
+  const m = thaiMonthsShort[date.getMonth()];
+  const buddhistYear = date.getFullYear() + 543;
+
+  return `${d} ${m} ${buddhistYear} ${timePart}`;
+};
+</script>

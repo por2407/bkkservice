@@ -1,0 +1,56 @@
+<svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer glow -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9333ea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Main circle with gradient - darker for white theme -->
+  <circle cx="70" cy="70" r="60" fill="url(#logoGradient)" filter="url(#glow)" opacity="1"/>
+  <circle cx="70" cy="70" r="60" fill="none" stroke="#1e40af" stroke-width="4" opacity="0.5"/>
+  
+  <!-- Pixel art style BKK - More cartoonish with darker colors -->
+  <!-- Letter B -->
+  <rect x="30" y="40" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="42" y="40" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="30" y="52" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="42" y="52" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="54" y="52" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="30" y="64" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="42" y="64" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="54" y="64" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="30" y="76" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="42" y="76" width="10" height="10" fill="#ffffff" rx="2"/>
+  
+  <!-- Letter K (simplified) -->
+  <rect x="68" y="40" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="68" y="52" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="68" y="64" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="68" y="76" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="80" y="52" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="92" y="40" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="92" y="64" width="10" height="10" fill="#ffffff" rx="2"/>
+  <rect x="104" y="76" width="10" height="10" fill="#ffffff" rx="2"/>
+  
+  <!-- Decorative pixels around - brighter colors -->
+  <rect x="25" y="25" width="6" height="6" fill="#2563eb" rx="1" opacity="0.9"/>
+  <rect x="109" y="25" width="6" height="6" fill="#9333ea" rx="1" opacity="0.9"/>
+  <rect x="25" y="109" width="6" height="6" fill="#ec4899" rx="1" opacity="0.9"/>
+  <rect x="109" y="109" width="6" height="6" fill="#2563eb" rx="1" opacity="0.9"/>
+  
+  <!-- Small decorative dots -->
+  <circle cx="50" cy="30" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="90" cy="30" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="50" cy="110" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="90" cy="110" r="3" fill="#ffffff" opacity="0.8"/>
+</svg>

@@ -1,0 +1,14 @@
+html,
+body {
+  font-family: "Noto Sans Thai", sans-serif;
+}
+/* ฟอนต์หัวข้อ */
+h1, h2, h3, .heading {
+  font-family: "Kanit", sans-serif;
+}
+
+/* ฟอนต์เน้นความหรู / บทความยาว */
+.serif {
+  font-family: "Taviraj", serif;
+}
+
