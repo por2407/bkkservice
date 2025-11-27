@@ -67,39 +67,49 @@
       </div>
     </TasksHeader>
 
-    <!-- search box แบบ sticky (ตัวเดียว ไม่ใช้ StickyHeader แล้ว) -->
-    <section
-      class="sticky top-0 z-30 pt-2 pb-2 "
-    >
-      <div class="relative">
-        <!-- icon ซ้าย -->
-        <span
-          class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-emerald-500/70"
-        >
-          <Search class="h-4 w-4" />
-        </span>
+    <!-- search box แบบ sticky + พื้นหลังเทาเต็มกว้าง + ชิดบนสุดตอนเลื่อน -->
+    <!-- ใช้ -top-3 ให้ทับ padding-top ของ main#app-scroll (0.75rem) -->
+    <section class="sticky -top-3 z-30">
+      <div
+        class="-mx-4"
+        :class="
+          showStickyHeader
+            ? 'bg-slate-50/90 backdrop-blur supports-[backdrop-filter]:bg-slate-50/70 border-b border-slate-200/70 shadow-sm rounded-b-2xl'
+            : ''
+        "
+      >
+        <div class="pt-2 pb-2 px-4">
+          <div class="relative">
+            <!-- icon ซ้าย -->
+            <span
+              class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-emerald-500/70"
+            >
+              <Search class="h-4 w-4" />
+            </span>
 
-        <!-- ช่องค้นหา -->
-        <input
-          v-model="searchQuery"
-          type="text"
-          inputmode="search"
-          placeholder="ค้นหาจากเลขที่งาน ห้อง หรือคำอธิบาย"
-          class="w-full rounded-2xl border border-emerald-100 bg-white/90 py-2 pl-9 pr-8 text-[13px] text-gray-800 shadow-sm outline-none ring-0 placeholder:text-gray-400 focus:border-emerald-400 focus:bg-white focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus:ring-2 focus:ring-emerald-200"
-        />
+            <!-- ช่องค้นหา -->
+            <input
+              v-model="searchQuery"
+              type="text"
+              inputmode="search"
+              placeholder="ค้นหาจากเลขที่งาน ห้อง หรือคำอธิบาย"
+              class="w-full rounded-2xl border border-emerald-100 bg-white/90 py-2 pl-9 pr-8 text-[13px] text-gray-800 shadow-sm outline-none ring-0 placeholder:text-gray-400 focus:border-emerald-400 focus:bg-white focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus:ring-2 focus:ring-emerald-200"
+            />
 
-        <!-- ปุ่มล้างข้อความ -->
-        <button
-          v-if="searchQuery"
-          type="button"
-          @click="searchQuery = ''"
-          class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 active:scale-95"
-        >
-          <X class="h-4 w-4" />
-        </button>
+            <!-- ปุ่มล้างข้อความ -->
+            <button
+              v-if="searchQuery"
+              type="button"
+              @click="searchQuery = ''"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 active:scale-95"
+            >
+              <X class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </section>
-
+    <div ref="headerRef"></div>
     <!-- list -->
     <TaskList
       v-if="!loading && filteredTasks.length > 0"
@@ -122,7 +132,6 @@
       aria-busy="true"
       aria-live="polite"
     >
-      <!-- หัวโหลด -->
       <div
         class="flex items-center justify-center gap-2 text-emerald-700/80 text-sm"
       >
@@ -130,7 +139,6 @@
         <span>กำลังโหลดรายการงาน...</span>
       </div>
 
-      <!-- skeleton cards -->
       <div
         v-for="i in 3"
         :key="i"
@@ -150,7 +158,7 @@
       </div>
     </section>
 
-    <!-- กรณีโหลดเสร็จแล้ว และไม่เหลืออะไรโหลดเพิ่ม + ไม่มีงานเลย -->
+    <!-- ไม่มีงาน -->
     <section
       v-else-if="!loading && filteredTasks.length === 0"
       class="pt-6 pb-4 flex flex-col items-center justify-center text-center text-gray-400"
@@ -169,7 +177,7 @@
       type="button"
       @click="scrollToTop"
       class="fixed right-4 z-40 rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 p-3 active:scale-95"
-      :style="{ bottom: 'calc(120px + env(safe-area-inset-bottom))' }"
+      :style="{ bottom: scrollTopButtonBottom }"
       aria-label="เลื่อนขึ้นด้านบนสุด"
     >
       <ChevronUp class="w-5 h-5" />
@@ -190,8 +198,14 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import TasksHeader from "@/components/share/task/TasksHeader.vue";
 import TaskList from "@/components/share/task/TaskList.vue";
 import { useTaskList } from "@/composables/task/useTaskList";
+import { useAuthStore } from "@/stores/auth.stores";
+import { useStickyHeader } from "@/composables/useStickyHeader";
 
-// ดึง state จาก useTaskList
+const authStore = useAuthStore();
+const { isMobile } = storeToRefs(authStore);
+
+const { headerRef, showStickyHeader } = useStickyHeader(isMobile);
+
 const {
   selectedFilter,
   searchQuery,
@@ -207,25 +221,39 @@ const {
   loadMore,
 } = useTaskList();
 
-// ref สำหรับ sentinel element (infinite scroll)
 const infiniteScrollTrigger = ref<HTMLElement | null>(null);
-// container ที่เลื่อนจริง (main#app-scroll ใน layout)
 const scrollContainer = ref<HTMLElement | null>(null);
-// state สำหรับปุ่มขึ้นบนสุด
 const showScrollTop = ref(false);
+
+// มี input / textarea / contenteditable โฟกัสอยู่ไหม
+const isAnyInputFocused = ref(false);
+
+// ✅ bottom ของปุ่ม scroll-top: ปกติ 120px, ถ้ามี input โฟกัสเหลือ 88px
+const scrollTopButtonBottom = computed(() =>
+  `calc(${isAnyInputFocused.value ? 88 : 120}px + env(safe-area-inset-bottom))`
+);
+
+const isEditableElement = (el: HTMLElement | null) => {
+  if (!el) return false;
+  const tag = el.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return true;
+  if (el.isContentEditable) return true;
+  return false;
+};
+
 
 let observer: IntersectionObserver | null = null;
 let scrollHandler: ((e: Event) => void) | null = null;
+let focusInHandler: ((e: FocusEvent) => void) | null = null;
+let focusOutHandler: ((e: FocusEvent) => void) | null = null;
 
 onMounted(() => {
-  // หา scroll container (main ใน layout)
   scrollContainer.value = document.getElementById(
     "app-scroll"
   ) as HTMLElement | null;
 
   if (scrollContainer.value) {
     scrollHandler = () => {
-      // โชว์ปุ่มเมื่อเลื่อนลงมามากกว่า ~300px
       showScrollTop.value = scrollContainer.value!.scrollTop > 300;
     };
     scrollContainer.value.addEventListener("scroll", scrollHandler, {
@@ -233,23 +261,18 @@ onMounted(() => {
     });
   }
 
-  // ถ้า browser ไม่รองรับ IntersectionObserver ก็จบแค่นี้ (ยังใช้ scroll-to-top ได้)
-  if (!("IntersectionObserver" in window)) {
-    return;
-  }
+  if (!("IntersectionObserver" in window)) return;
 
   observer = new IntersectionObserver(
     (entries) => {
       const entry = entries[0];
       if (!entry) return;
 
-      // ถ้าหัว sentinel ชน viewport + ยังมีให้โหลด + ไม่ได้โหลดอยู่
       if (entry.isIntersecting && canLoadMore.value && !loading.value) {
         loadMore();
       }
     },
     {
-      // ใช้ scroll container เป็น root จะนิ่งดีใน app ที่เป็น webview
       root: scrollContainer.value ?? null,
       rootMargin: "0px 0px 200px 0px",
       threshold: 0.1,
@@ -259,6 +282,28 @@ onMounted(() => {
   if (infiniteScrollTrigger.value) {
     observer.observe(infiniteScrollTrigger.value);
   }
+
+  // ✅ จับ focus/blur ทุก input/textarea/contenteditable ทั่วหน้า
+  focusInHandler = (e: FocusEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (isEditableElement(target)) {
+      isAnyInputFocused.value = true;
+    }
+  };
+
+  focusOutHandler = (e: FocusEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (isEditableElement(target)) {
+      // เช็ค activeElement อีกที เผื่อโฟกัสย้ายไปช่องอื่น
+      setTimeout(() => {
+        const active = document.activeElement as HTMLElement | null;
+        isAnyInputFocused.value = isEditableElement(active);
+      }, 0);
+    }
+  };
+
+  document.addEventListener("focusin", focusInHandler);
+  document.addEventListener("focusout", focusOutHandler);
 });
 
 onBeforeUnmount(() => {
@@ -266,29 +311,25 @@ onBeforeUnmount(() => {
     observer.disconnect();
     observer = null;
   }
-
   if (scrollContainer.value && scrollHandler) {
     scrollContainer.value.removeEventListener("scroll", scrollHandler);
   }
 });
 
-// ฟังก์ชันเลื่อนขึ้นบนสุด
 const scrollToTop = () => {
   if (scrollContainer.value) {
     scrollContainer.value.scrollTo({ top: 0, behavior: "smooth" });
   } else {
-    // fallback ถ้าไหน ๆ (เช่น เปลี่ยน layout ในอนาคต)
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 };
 </script>
 
 <style scoped>
-/* สปินเนอร์เล็ก ๆ ข้างข้อความ */
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2.5px solid rgba(16, 185, 129, 0.25); /* emerald-500 แบบจาง */
+  border: 2.5px solid rgba(16, 185, 129, 0.25);
   border-top-color: rgba(16, 185, 129, 0.9);
   border-radius: 50%;
   display: inline-block;
@@ -301,7 +342,6 @@ const scrollToTop = () => {
   }
 }
 
-/* skeleton shimmer */
 .skeleton-card {
   position: relative;
   overflow: hidden;
