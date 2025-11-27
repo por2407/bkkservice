@@ -163,6 +163,21 @@ const route = useRoute()
 const { sidebarMenu } = useSidebarMenu()
 const nav = useNavStore()
 
+// container ที่เลื่อนจริง
+const scrollContainer = ref<HTMLElement | null>(null);
+
+onMounted(() => {
+  scrollContainer.value = document.getElementById("app-scroll") as HTMLElement | null;
+});
+
+// ฟังก์ชันรีเซ็ต scroll ให้อยู่บนสุด
+const resetScrollTop = () => {
+  if (!scrollContainer.value) {
+    scrollContainer.value = document.getElementById("app-scroll") as HTMLElement | null;
+  }
+  scrollContainer.value?.scrollTo({ top: 0, behavior: "auto" });
+};
+
 const syncActiveWithRoute = () => {
   const i = sidebarMenu.value.findIndex(
     (m) => !m.external && m.to === route.path
@@ -176,6 +191,11 @@ const handleNavClick = (index: number, item: menu) => {
     return
   }
   nav.setActive(index)
+
+  // รีเซ็ต scroll ทุกครั้งที่เปลี่ยนเมนู
+  if (import.meta.client) {
+    resetScrollTop();
+  }
 }
 
 watch(
