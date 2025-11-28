@@ -6,7 +6,7 @@
     <!-- Content -->
     <main
       ref="scrollContainer"
-      class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain
+      class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-none
              px-3 pt-3 pb-3 sm:px-4 sm:pt-4"
       style="padding-bottom: calc(84px + env(safe-area-inset-bottom))"
     >
