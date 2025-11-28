@@ -17,11 +17,10 @@ async function findCustomerInprogress({ conn, userCode, custSeq }) {
     s.STT_STATUS,
     s.STT_TAR_NO,
     CASE
-        WHEN t.BTDST_SCORE IS NULL 
-             AND CO.GETTARTYPE(s.STT_JOBNO) <> '(Demo/Present)'
-        THEN 1
-        ELSE 0
-    END AS RATING,
+       WHEN TRIM(NVL(CO.GETTARTYPE(s.STT_JOBNO), '')) = '(Demo/Present)' THEN 0
+       ELSE 1
+    END AS CANRATING,
+    t.BTDST_SCORE,
     CASE 
         WHEN s.STT_CUST_SEQ = :custSeq THEN 1 
         ELSE 2 
@@ -100,7 +99,8 @@ async function findEmployeeInprogress({ conn, userCode }) {
         WHEN s.SSMT_STATUS = 'Y' AND s.SSMT_TYPE_SEQ = '5' THEN 'done'
         WHEN s.SSMT_STATUS IS NULL THEN 'in_progress'
     END AS STATUS,
-    m.SSMT_ENDJOB_DATE
+    m.SSMT_ENDJOB_DATE,
+    sc.BTDST_SCORE
 FROM (
     SELECT
         SSMT_JOB_NO AS JOB_NO,
@@ -117,6 +117,14 @@ JOIN SV_TARM_T t
 LEFT JOIN SV_SERVICEM_T m 
    ON m.SSMT_JOB_NO   = t.STT_JOBNO
   AND m.SSMT_TYPE_SEQ = '5'
+LEFT JOIN (
+        SELECT
+            BTDST_NO,
+            MAX(BTDST_SCORE) AS BTDST_SCORE
+        FROM BK_TARDS_T
+        GROUP BY BTDST_NO
+    ) sc
+        ON sc.BTDST_NO = s.JOB_NO
 ORDER BY
     t.STT_DATE DESC
 `,
@@ -181,6 +189,8 @@ WHERE
     )
     AND getflagsendmail(s.STT_JOBNO) = 'T' 
     AND s.STT_DATE  >= ADD_MONTHS(SYSDATE, -48)
+ORDER BY 
+    s.STT_DATE DESC
 `,
     { userCode }
   );

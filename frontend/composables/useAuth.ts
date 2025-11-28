@@ -14,8 +14,8 @@ export function useAuth() {
     try {
       if (user == "customer" && pass == "customer") {
         data = {
-          userCode: "01897",
-          custSeq: "23",
+          userCode: "00005",
+          custSeq: "27",
           appType: "a",
           userType: "c",
           name: "กันยา",
@@ -23,7 +23,7 @@ export function useAuth() {
         };
       } else if (user == "employee" && pass == "employee") {
         data = {
-          userCode: "560172",
+          userCode: "550135",
           appType: "a",
           userType: "e",
           name: "ชัชวาลย์",

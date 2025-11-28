@@ -5,9 +5,14 @@ meta {
 }
 
 get {
-  url: http://localhost:3001/api/tasks/list
-  body: json
+  url: http://localhost:3001/api/tasks/list?userCode=2&userType=d
+  body: none
   auth: inherit
+}
+
+params:query {
+  userCode: 2
+  userType: d
 }
 
 body:json {

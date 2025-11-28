@@ -35,25 +35,31 @@
               {{ formatUpdatedAt(task.updatedAt) }}
             </p>
           </div>
-
+          <div
+            v-if="task.room"
+            class="inline-flex items-center gap-1 text-[11px] text-gray-600"
+          >
+            <MapPin class="h-3.5 w-3.5" />
+            <span>ห้อง {{ task.room }}</span>
+          </div>
           <div class="mt-0.5 flex flex-wrap gap-x-3 gap-y-1.5">
             <div
-              v-if="task.room"
-              class="inline-flex items-center gap-1 text-[11px] text-gray-600"
-            >
-              <MapPin class="h-3.5 w-3.5" />
-              <span>ห้อง {{ task.room }}</span>
-            </div>
-
-            <div
-              class="inline-flex items-center gap-1 text-[11px] text-gray-600"
+              class="inline-flex items-center gap-1.5 text-[11px] text-gray-600"
             >
               <CheckCircle2
                 v-if="task.status === 'done'"
                 class="h-3.5 w-3.5 text-emerald-600"
               />
               <Clock v-else class="h-3.5 w-3.5 text-amber-600" />
+
               <span>{{ statusShort(task.status) }}</span>
+
+              <span
+                v-if="task.status === 'in_progress'"
+                class="inline-flex items-center justify-center h-3.5 px-1.5 rounded-full bg-emerald-500 text-[9px] font-semibold text-white"
+              >
+                4/5
+              </span>
             </div>
 
             <!-- attachments -->
@@ -103,6 +109,14 @@
           <p class="mt-1 text-[11px] font-semibold text-red-500">
             กำหนดแล้วเสร็จ: {{ formatDueDate(task.dueDate) }}
           </p>
+
+          <p
+            v-if="isDealer"
+            class="text-[11px] font-semibold"
+            :class="getDealerStatusDisplay(task).colorClass"
+          >
+            {{ getDealerStatusDisplay(task).text }}
+          </p>
         </div>
 
         <!-- arrow -->
@@ -141,10 +155,27 @@ import {
 import { formatDueDate, formatUpdatedAt } from "@/utils/date";
 import type { Task, TaskStatus } from "@/types/task";
 
-defineProps<{
+const props = defineProps<{
   TaskData: Task[];
   isCustomer: boolean;
+  isDealer: boolean;
 }>();
+
+const getDealerStatusDisplay = (item: Task) => {
+  const textMap: Record<string, string> = {
+    in_progress: `วันที่กำหนดแล้วเสร็จ (ในเวลาทำการ): ${item.eduExh48}`,
+    done: item.endsv_job ? `Finished ${item.endsv_job}` : "ยังไม่จบงาน",
+  };
+
+  const text = textMap[item.status] ?? "สถานะไม่ทราบ";
+
+  const colorClass =
+    item.status === "done" && item.endsv_job
+      ? "text-green-500"
+      : "text-red-500";
+
+  return { text, colorClass };
+};
 
 const statusShort = (status: TaskStatus) => {
   switch (status) {

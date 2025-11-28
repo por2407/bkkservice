@@ -32,6 +32,10 @@ async function taskStatuses(ctx) {
       const hasVideo = files.some((name) =>
         name.toLowerCase().endsWith(".mov")
       );
+
+      const canRate =
+        row.STT_STATUS === "Y" &&
+        (userType === "c" ? row.CANRATING === 1 : true);
       const data = {
         id: row.STT_JOBNO ?? row.JOB_NO,
         ...(row.ORDERING ? { isMine: row.ORDERING === 1 } : {}),
@@ -42,8 +46,8 @@ async function taskStatuses(ctx) {
         status: row.STATUS,
         updatedAt: row.STT_DATE,
         commentsCount: 3,
-        canRate: row.STT_STATUS === "Y",
-        rating: row.RATING ? true : false,
+        canRate,
+        rating: row.BTDST_SCORE ?? null,
         dueDate: row.SSMT_ENDJOB_DATE ?? null,
         hasImage,
         hasVideo,

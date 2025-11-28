@@ -5,16 +5,14 @@ meta {
 }
 
 get {
-  url: http://localhost:3001/api/tasks/list
-  body: json
+  url: http://localhost:3001/api/tasks/list?userCode=560172&userType=e
+  body: formUrlEncoded
   auth: inherit
 }
 
-body:json {
-  {
-    "userCode": "560170",
-    "userType": "e"
-  }
+params:query {
+  userCode: 560172
+  userType: e
 }
 
 settings {

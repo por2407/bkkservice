@@ -1,8 +1,8 @@
 <template>
   <!-- กล่องหลัก มี padding ครบในตัว -->
   <div
-    class="min-h-screen px-4 pt-4 pb-6 transition-colors duration-300"
-    :class="pageBgClass"
+    class="min-h-full pt-4 pb-6 transition-colors duration-300"
+    :class="[pageBgClass, isMobile ? 'px-3' : 'px-4']"
   >
     <!-- top header / hero -->
     <TasksHeader :taskCount="filteredTasks.length">
@@ -11,7 +11,8 @@
         <button
           type="button"
           @click="selectedFilter = 'in_progress'"
-          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur
+                 transition active:scale-[0.98] border-2 border-white/70"
           :class="
             selectedFilter === 'in_progress'
               ? filterStyles.in_progress
@@ -29,7 +30,8 @@
         <button
           type="button"
           @click="selectedFilter = 'done'"
-          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur
+                 transition active:scale-[0.98] border-2 border-white/70"
           :class="
             selectedFilter === 'done'
               ? filterStyles.done
@@ -45,10 +47,11 @@
 
         <!-- all -->
         <button
-          v-if="isAll"
+          v-if="!isEmployee"
           type="button"
           @click="selectedFilter = 'all'"
-          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur
+                 transition active:scale-[0.98] border-2 border-white/70"
           :class="
             selectedFilter === 'all'
               ? filterStyles.all
@@ -64,18 +67,17 @@
       </div>
     </TasksHeader>
 
-    <!-- search box แบบ sticky + พื้นหลังเทาเต็มกว้าง + ชิดบนสุดตอนเลื่อน -->
-    <!-- ใช้ -top-3 ให้ทับ padding-top ของ main#app-scroll (0.75rem) -->
+    <!-- search box sticky (full-bleed ตาม padding ของหน้าปัจจุบัน) -->
     <section :class="isMobile ? 'sticky -top-3 z-30' : ''">
       <div
-        class="-mx-4"
-        :class="
+        :class="[
+          isMobile ? '-mx-3' : '-mx-4',
           showStickyHeader
             ? 'bg-slate-50/90 backdrop-blur supports-[backdrop-filter]:bg-slate-50/70 border-b border-slate-200/70 shadow-sm rounded-b-2xl'
             : ''
-        "
+        ]"
       >
-        <div class="pt-2 pb-2 px-4">
+        <div :class="['pt-2 pb-2', isMobile ? 'px-3' : 'px-4']">
           <div class="relative">
             <!-- icon ซ้าย -->
             <span
@@ -90,7 +92,12 @@
               type="text"
               inputmode="search"
               placeholder="ค้นหาจากเลขที่งาน ห้อง หรือคำอธิบาย"
-              class="w-full rounded-2xl border border-emerald-100 bg-white/90 py-2 pl-9 pr-8 text-[13px] text-gray-800 shadow-sm outline-none ring-0 placeholder:text-gray-400 focus:border-emerald-400 focus:bg-white focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus:ring-2 focus:ring-emerald-200"
+              class="w-full rounded-2xl border border-emerald-100 bg-white/90
+                     py-2 pl-9 pr-8 text-[13px] text-gray-800 shadow-sm outline-none ring-0
+                     placeholder:text-gray-400
+                     focus:border-emerald-400 focus:bg-white
+                     focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)]
+                     focus:ring-2 focus:ring-emerald-200"
             />
 
             <!-- ปุ่มล้างข้อความ -->
@@ -106,15 +113,18 @@
         </div>
       </div>
     </section>
+
     <div ref="headerRef"></div>
+
     <!-- list -->
     <TaskList
       v-if="!loading && filteredTasks.length > 0"
       :TaskData="visibleTasks"
       :isCustomer="isCustomer"
+      :isDealer="isDealer"
     />
 
-    <!-- sentinel สำหรับ infinite scroll (อยู่ท้าย list เสมอ แต่ซ่อน/โชว์ด้วย v-show) -->
+    <!-- sentinel สำหรับ infinite scroll -->
     <div
       ref="infiniteScrollTrigger"
       v-show="!loading && canLoadMore && filteredTasks.length > 0"
@@ -172,8 +182,20 @@
 </template>
 
 <script setup lang="ts">
-import { ClipboardList, Clock, CheckCircle2, Search, X } from "lucide-vue-next";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import {
+  ClipboardList,
+  Clock,
+  CheckCircle2,
+  Search,
+  X,
+} from "lucide-vue-next";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  computed,
+} from "vue";
+import { storeToRefs } from "pinia";
 import TasksHeader from "@/components/share/task/TasksHeader.vue";
 import TaskList from "@/components/share/task/TaskList.vue";
 import { useTaskList } from "@/composables/task/useTaskList";
@@ -184,8 +206,9 @@ const authStore = useAuthStore();
 const { isMobile } = storeToRefs(authStore);
 
 const { headerRef, showStickyHeader } = useStickyHeader(isMobile);
-const isAll = computed(() => !!(authStore.user?.userType !== "e"));
+const isEmployee = computed(() => !!(authStore.user?.userType === "e"));
 const isCustomer = computed(() => !!(authStore.user?.userType === "c"));
+const isDealer = computed(() => !!(authStore.user?.userType === "d"));
 
 const {
   selectedFilter,
@@ -207,7 +230,6 @@ const infiniteScrollTrigger = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {
-  // กันเผื่อ browser / webview แปลก ๆ ไม่รองรับ IO
   if (!("IntersectionObserver" in window)) {
     return;
   }
@@ -217,14 +239,13 @@ onMounted(() => {
       const entry = entries[0];
       if (!entry) return;
 
-      // ถ้า sentinel โผล่ใน viewport + ยังมีให้โหลด + ไม่ได้อยู่ระหว่างโหลด
       if (entry.isIntersecting && canLoadMore.value && !loading.value) {
         loadMore();
       }
     },
     {
-      root: null, // ใช้ viewport ปัจจุบัน (ใน webview ก็โอเค)
-      rootMargin: "0px 0px 200px 0px", // preload ก่อนถึงจริงนิดหน่อย (กันชน bottom nav)
+      root: null,
+      rootMargin: "0px 0px 200px 0px",
       threshold: 0.1,
     }
   );
@@ -247,7 +268,7 @@ onBeforeUnmount(() => {
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2.5px solid rgba(16, 185, 129, 0.25); /* emerald-500 แบบจาง */
+  border: 2.5px solid rgba(16, 185, 129, 0.25);
   border-top-color: rgba(16, 185, 129, 0.9);
   border-radius: 50%;
   display: inline-block;
