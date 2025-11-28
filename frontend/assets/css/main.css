@@ -1,6 +1,7 @@
 html,
 body {
   font-family: "Noto Sans Thai", sans-serif;
+  overscroll-behavior: none;
 }
 /* ฟอนต์หัวข้อ */
 h1, h2, h3, .heading {
