@@ -53,3 +53,22 @@ const thaiMonthsShort = [
   
     return `${d} ${m} ${buddhistYear} ${hours}:${minutes} น.`;
   };
+
+
+  export const formatThaiDateTime = (isoString: string) => {
+    const date = new Date(isoString);
+    const datePart = formatThaiDate(isoString);
+    const hh = date.getHours().toString().padStart(2, "0");
+    const mm = date.getMinutes().toString().padStart(2, "0");
+    const ss = date.getSeconds().toString().padStart(2, "0");
+    return `${datePart} ${hh}:${mm}:${ss}`;
+  };
+  
+  
+  export const formatThaiDate = (isoString: string) => {
+    const date = new Date(isoString);
+    const d = date.getDate().toString().padStart(2, "0");
+    const m = thaiMonthsShort[date.getMonth()];
+    const y = date.getFullYear() + 543;
+    return `${d} ${m} ${y}`;
+  };

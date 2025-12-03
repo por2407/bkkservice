@@ -23,7 +23,7 @@ export function useAuth() {
         };
       } else if (user == "employee" && pass == "employee") {
         data = {
-          userCode: "550135",
+          userCode: "440020",
           appType: "a",
           userType: "e",
           name: "ชัชวาลย์",

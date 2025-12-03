@@ -1,7 +1,19 @@
+//Feature-based + Layered
 export const taskModel = {
-  findCustomerInprogress,
-  findEmployeeInprogress,
-  findDealerInprogress,
+  customer: {
+    findCustomerInprogress,
+    nextRefTask,
+    createNewTask,
+  },
+  employee: {
+    findEmployeeInprogress,
+  },
+  dealer: {
+    findDealerInprogress,
+  },
+  findDetail,
+  timeLine,
+  getPartialInfo,
 };
 
 async function findCustomerInprogress({ conn, userCode, custSeq }) {
@@ -42,7 +54,8 @@ async function findCustomerInprogress({ conn, userCode, custSeq }) {
         THEN 'in_progress'
         WHEN s.STT_STATUS = 'Y' THEN 'done'
     END AS STATUS,
-    m.SSMT_ENDJOB_DATE
+    m.SSMT_ENDJOB_DATE,
+    c.SSMT_TYPE_SEQ 
 FROM 
     SV_TARM_T s
     -- สรุป ENDJOB_DATE ให้เหลือ 1 แถวต่อ JOBNO ก่อน
@@ -64,7 +77,16 @@ FROM
         GROUP BY BTDST_NO
     ) t
         ON t.BTDST_NO = s.STT_JOBNO
-       AND s.STT_STATUS = 'Y'
+       AND s.STT_STATUS = 'Y' 
+    LEFT JOIN (
+    SELECT
+        SSMT_JOB_NO,
+        MAX(SSMT_TYPE_SEQ) AS SSMT_TYPE_SEQ
+    FROM SV_SERVICEM_T
+    WHERE SSMT_STATUS = 'Y'
+    GROUP BY SSMT_JOB_NO
+) c
+   ON c.SSMT_JOB_NO = s.STT_JOBNO 
 WHERE 
     s.STT_CUST_CODE = :userCode 
     AND s.STT_DATE  >= ADD_MONTHS(SYSDATE, -48)
@@ -100,7 +122,8 @@ async function findEmployeeInprogress({ conn, userCode }) {
         WHEN s.SSMT_STATUS IS NULL THEN 'in_progress'
     END AS STATUS,
     m.SSMT_ENDJOB_DATE,
-    sc.BTDST_SCORE
+    sc.BTDST_SCORE,
+    c.SSMT_TYPE_SEQ 
 FROM (
     SELECT
         SSMT_JOB_NO AS JOB_NO,
@@ -124,7 +147,16 @@ LEFT JOIN (
         FROM BK_TARDS_T
         GROUP BY BTDST_NO
     ) sc
-        ON sc.BTDST_NO = s.JOB_NO
+        ON sc.BTDST_NO = s.JOB_NO 
+LEFT JOIN (
+    SELECT
+        SSMT_JOB_NO,
+        MAX(SSMT_TYPE_SEQ) AS SSMT_TYPE_SEQ
+    FROM SV_SERVICEM_T
+    WHERE SSMT_STATUS = 'Y'
+    GROUP BY SSMT_JOB_NO
+) c
+   ON c.SSMT_JOB_NO = t.STT_JOBNO  
 ORDER BY
     t.STT_DATE DESC
 `,
@@ -166,11 +198,21 @@ async function findDealerInprogress({ conn, userCode }) {
     END AS STATUS,
     m.SSMT_ENDJOB_DATE,
          to_char(SSMT_DATE_ED,'dd Mon YYYY hh24:mi','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI') as END_SV_DATE,
-         getjobservicedate(s.STT_JOBNO,'C') AS EXHIBITION_48
+         getjobservicedate(s.STT_JOBNO,'C') AS EXHIBITION_48,
+      c.SSMT_TYPE_SEQ 
 FROM SV_TARM_T s 
    LEFT JOIN SV_SERVICEM_T m 
    ON m.SSMT_JOB_NO = s.STT_JOBNO
-      AND m.SSMT_TYPE_SEQ = '5'
+      AND m.SSMT_TYPE_SEQ = '5' 
+  LEFT JOIN (
+    SELECT
+        SSMT_JOB_NO,
+        MAX(SSMT_TYPE_SEQ) AS SSMT_TYPE_SEQ
+    FROM SV_SERVICEM_T
+    WHERE SSMT_STATUS = 'Y'
+    GROUP BY SSMT_JOB_NO
+) c
+   ON c.SSMT_JOB_NO = s.STT_JOBNO  
 WHERE
     -- เงื่อนไขแทน STT_CUST_CODE IN (SELECT DISTINCT BJR_DPM_CODE ...)
     EXISTS (
@@ -193,5 +235,153 @@ ORDER BY
     s.STT_DATE DESC
 `,
     { userCode }
+  );
+}
+
+async function findDetail({ conn, tarNo, type }) {
+  const cols = type
+    ? ` CASE 
+        WHEN (
+                (
+                    (s.STT_STATUS IS NULL OR s.STT_STATUS <> 'Y')
+                    AND s.STT_JOBNO IS NOT NULL
+                    AND EXISTS (
+                        SELECT 1
+                        FROM co.BK_TARM_T b
+                        WHERE b.BTMT_NO = s.STT_JOBNO
+                          AND b.BTMT_JOB_STATUS IS NULL
+                    )
+                )
+                OR (s.STT_STATUS IS NULL AND s.STT_JOBNO IS NULL)
+             )
+        THEN 'in_progress'
+        WHEN s.STT_STATUS = 'Y' THEN 'done'
+    END AS STATUS `
+    : ` CASE
+        WHEN m.SSMT_STATUS = 'Y' AND m.SSMT_TYPE_SEQ = '5' THEN 'done'
+        WHEN m.SSMT_STATUS IS NULL THEN 'in_progress'
+    END AS STATUS,
+    t.BTDST_SUBMIT_DATE  `;
+
+  const joins = !type
+    ? ` join SV_SERVICEM_T m  ON m.SSMT_JOB_NO = s.STT_JOBNO 
+        join BK_TARDS_T t on t.BTDST_NO = s.STT_JOBNO`
+    : ``;
+
+  return conn.execute(
+    `select s.STT_JOBNO, s.STT_TAR_NO, s.STT_ROOM_NO, s.STT_DET, s.STT_IMAGE, s.STT_STATUS, s.STT_DATE, ${cols} from SV_TARM_T s ${joins} where s.STT_TAR_NO =:tarNo`,
+    { tarNo }
+  );
+}
+
+async function timeLine({ conn, JobNo }) {
+  return conn.execute(
+    `SELECT 
+    s.SSMT_TYPE_CODE, s.SSMT_TYPE_SEQ, 
+    s.SSMT_ENDJOB_DATE,
+    s.SSMT_STATUS, 
+    s.SSMT_DATE_ST,
+    s.SSMT_DATE_ED,
+    s.SSMT_EMPCODE,
+    getdemp(s.SSMT_EMPCODE,'N') as EMP_NAME,
+    t.SSSR_DESC  
+    FROM SV_SERVICEM_T s 
+      JOIN SV_SERVICE_SEQ_R t 
+       ON t.SSSR_TYPE = s.SSMT_TYPE_CODE
+      AND t.SSSR_SEQ = s.SSMT_TYPE_SEQ
+    WHERE s.SSMT_JOB_NO =:JobNo 
+    ORDER BY s.SSMT_TYPE_SEQ DESC`,
+    { JobNo }
+  );
+}
+
+async function getPartialInfo({ conn, tarNo, type }) {
+  const cols = type
+    ? ``
+    : `, t.BTDST_SUBMIT_DATE  `;
+
+  const joins = !type
+    ? ` join BK_TARDS_T t on t.BTDST_NO = s.STT_JOBNO`
+    : ``;
+  return conn.execute(
+    `
+    select s.STT_JOBNO ${cols} from SV_TARM_T s ${joins} where s.STT_TAR_NO =:tarNo 
+    `,
+    { tarNo }
+  );
+}
+
+async function nextRefTask({ conn }) {
+  return conn.execute(`
+    WITH date_part AS (
+      SELECT 'BS'
+             || SUBSTR(
+                  TO_CHAR(
+                    SYSDATE,
+                    'YYYY',
+                    'NLS_CALENDAR=''THAI BUDDHA'' NLS_DATE_LANGUAGE=THAI'
+                  ),
+                  3, 2
+                )
+             || TO_CHAR(SYSDATE, 'MM') AS prefix
+      FROM dual
+    ),
+    max_no AS (
+      SELECT d.prefix,
+             MAX(t.STT_TAR_NO) AS max_tar_no
+      FROM date_part d
+           LEFT JOIN SV_TARM_T t
+             ON t.STT_TAR_NO LIKE d.prefix || '%'
+      GROUP BY d.prefix
+    )
+    SELECT
+      prefix
+      || LPAD(
+           NVL(TO_NUMBER(SUBSTR(max_tar_no, -4)), 0) + 1,
+           4,
+           '0'
+         ) AS STT_TAR_NO
+    FROM max_no
+    `);
+}
+
+async function createNewTask({ conn, payload }) {
+  const { userCode, custSeq, room, machineNo, description, nameFile, tarNo } =
+    payload;
+
+  const sql = `
+    INSERT INTO SV_TARM_T (
+      STT_CUST_CODE,
+      STT_CUST_SEQ,
+      STT_DATE,
+      STT_ROOM_NO,
+      STT_COMP_SN,
+      STT_DET,
+      STT_IMAGE,
+      STT_TAR_NO
+    ) VALUES (
+      :userCode,
+      :custSeq,
+      SYSDATE,
+      :room,
+      :machineNo,
+      :description,
+      :nameFile,
+      :tarNo
+    )
+  `;
+
+  return conn.execute(
+    sql,
+    {
+      userCode,
+      custSeq,
+      room,
+      machineNo,
+      description,
+      nameFile,
+      tarNo,
+    },
+    { autoCommit: false }
   );
 }

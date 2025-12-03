@@ -2,3 +2,4 @@ backend/node_modules/
 backend/instantclient_19_26/
 backend/.env
 uploads
+go

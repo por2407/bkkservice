@@ -5,7 +5,8 @@
       <NuxtLink
         v-for="task in TaskData"
         :key="task.id"
-        :to="`/customer/task/${task.id}`"
+        :to="`/${isCustomer ? 'customer' : 'employee'}/task/${task.ticket}`"
+        @click="taskStore.setList(task)"
         class="relative grid grid-cols-[1fr,auto] items-stretch gap-2.5 rounded-[22px] bg-white px-3.5 py-3 text-inherit shadow-[0_14px_34px_rgba(15,23,42,0.08)] no-underline transition-transform transition-shadow active:scale-[0.985] active:shadow-[0_10px_22px_rgba(15,23,42,0.16)]"
       >
         <!-- center content -->
@@ -55,10 +56,10 @@
               <span>{{ statusShort(task.status) }}</span>
 
               <span
-                v-if="task.status === 'in_progress'"
+                v-if="task.status === 'in_progress' && task.currentStep"
                 class="inline-flex items-center justify-center h-3.5 px-1.5 rounded-full bg-emerald-500 text-[9px] font-semibold text-white"
               >
-                4/5
+                {{ task.currentStep }}/5
               </span>
             </div>
 
@@ -106,7 +107,10 @@
             {{ task.description }}
           </p>
 
-          <p class="mt-1 text-[11px] font-semibold text-red-500">
+          <p
+            v-if="task.dueDate"
+            class="mt-1 text-[11px] font-semibold text-red-500"
+          >
             กำหนดแล้วเสร็จ: {{ formatDueDate(task.dueDate) }}
           </p>
 
@@ -150,16 +154,18 @@ import {
   Video,
   MessageCircle,
   Star,
-  User,
 } from "lucide-vue-next";
 import { formatDueDate, formatUpdatedAt } from "@/utils/date";
-import type { Task, TaskStatus } from "@/types/task";
+import type { Task, TaskStatus, TaskBase } from "@/types/task";
+import { useTaskStore } from "@/stores/task.stores";
 
-const props = defineProps<{
+defineProps<{
   TaskData: Task[];
   isCustomer: boolean;
   isDealer: boolean;
 }>();
+
+const taskStore = useTaskStore();
 
 const getDealerStatusDisplay = (item: Task) => {
   const textMap: Record<string, string> = {

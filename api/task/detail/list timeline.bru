@@ -1,0 +1,29 @@
+meta {
+  name: list timeline
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3001/api/tasks/time-line?tarNo=BS66080954&userType=c
+  body: none
+  auth: inherit
+}
+
+params:query {
+  tarNo: BS66080954
+  userType: c
+}
+
+body:json {
+  {
+    "userCode": "01897",
+    "custSeq": 23,
+    "userType": "c"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

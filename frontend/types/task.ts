@@ -1,39 +1,54 @@
 export type TaskStatus = "in_progress" | "done";
 export type FilterKey = "all" | "in_progress" | "done";
 
-export interface Task {
+
+export interface TaskBase {
   id: string;
-  isMine?: boolean;
-  schoolName?: string;
   ticket: string;
   room: string;
   description: string;
   status: TaskStatus;
   updatedAt: string; // ISO string เช่น "2025-11-01T10:36:05+07:00"
+  
+  // rating
+  canRate?: boolean; // ขึ้นไอคอนได้หรือยัง
+  rating?: number | null; // ถ้าให้แล้ว 1–5, ถ้ายัง = null
+  currentStep?: number | null;
+  media: TaskMedia[];
+}
+
+export interface Task extends TaskBase {
+  isMine?: boolean;
+  schoolName?: string;
   dueDate: string;
+
   hasImage?: boolean;
   hasVideo?: boolean;
   commentsCount?: number;
-  endsv_job? : string;
+  endsv_job?: string;
   eduExh48?: string;
-
-  //rating
-  canRate?: boolean; // ขึ้นไอคอนได้หรือยัง
-  rating?: number | null; // ถ้าให้แล้ว 1–5, ถ้ายัง = null
 }
+
+export interface TaskDetail extends TaskBase {
+  timeline?: StepRuntimeInfo[];
+  isSubmit?: boolean;
+}
+
 
 type MediaType = "image" | "video";
 
-interface TaskMedia {
+export interface TaskMedia {
   type: MediaType;
   url: string;
 }
 
-interface StepRuntimeInfo {
+export interface StepRuntimeInfo {
   step: number;
+  label: string;
   finishedAt?: string;
   dueAt?: string;
   operator?: string;
+  empCode?: string;
 }
 
 interface TimelineStep {
@@ -44,16 +59,7 @@ interface TimelineStep {
   icon: string; // รูปภาพจาก online
 }
 
-export interface TaskDetail {
-  id: string;
-  room: string;
-  description: string;
-  status: TaskStatus;
-  updatedAt: string;
-  media: TaskMedia[];
-  currentStep: number;
-  timeline?: StepRuntimeInfo[];
-}
+
 
 /* ---------- comment types ---------- */
 
@@ -74,4 +80,9 @@ interface TaskComment {
 export interface RatingItem {
   id: string;
   label: string;
+}
+
+export interface PreviewMedia {
+  type: MediaType;
+  url: string;
 }

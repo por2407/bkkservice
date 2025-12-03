@@ -1,1249 +1,325 @@
-<!-- <template>
-  <LayoutTaskDetail :task="detailTask" />
+<template>
+  <div class="min-h-screen bg-slate-50 pb-6">
+    <!-- 🦴 SKELETON ตอนโหลดครั้งแรก -->
+    <section
+      v-if="loading"
+      class="mt-0 space-y-4 px-4 pb-4"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <!-- แถวแจ้งกำลังโหลด -->
+      <div
+        class="pt-3 flex items-center justify-center gap-2 text-emerald-700/80 text-sm"
+      >
+        <span class="spinner"></span>
+        <span>กำลังโหลดรายละเอียดงาน...</span>
+      </div>
+
+      <!-- HEADER: ปุ่ม back + ชื่อหน้า + chip หมายเลขงาน -->
+      <header class="mt-1 bg-slate-50/80 backdrop-blur rounded-2xl">
+        <div class="flex items-center justify-between px-2 pt-3 pb-2">
+          <div class="flex items-center gap-3">
+            <!-- ปุ่ม back -->
+            <div class="skeleton h-8 w-8 rounded-full"></div>
+            <!-- ชื่อหน้า -->
+            <div class="skeleton h-4 w-28 rounded"></div>
+          </div>
+          <!-- chip id -->
+          <div class="skeleton h-5 w-16 rounded-full"></div>
+        </div>
+
+        <!-- การ์ดข้อมูลงาน (TaskDetailHeader skeleton) -->
+        <div class="px-2 pb-3">
+          <div
+            class="skeleton-card rounded-2xl border border-slate-100 bg-white/80 p-3 shadow-sm space-y-2"
+          >
+            <div class="flex items-start gap-3">
+              <!-- icon / avatar -->
+              <div class="skeleton h-9 w-9 rounded-full"></div>
+              <div class="flex-1 space-y-2">
+                <div class="skeleton h-4 w-3/5 rounded"></div>
+                <div class="skeleton h-3 w-2/5 rounded"></div>
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <div class="skeleton h-4 w-20 rounded-full"></div>
+                  <div class="skeleton h-4 w-16 rounded-full"></div>
+                  <div class="skeleton h-4 w-24 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- แถวข้อมูลสรุปสั้น ๆ -->
+            <div class="mt-2 grid grid-cols-3 gap-2">
+              <div class="space-y-1">
+                <div class="skeleton h-2.5 w-10 rounded"></div>
+                <div class="skeleton h-3.5 w-16 rounded"></div>
+              </div>
+              <div class="space-y-1">
+                <div class="skeleton h-2.5 w-12 rounded"></div>
+                <div class="skeleton h-3.5 w-20 rounded"></div>
+              </div>
+              <div class="space-y-1">
+                <div class="skeleton h-2.5 w-14 rounded"></div>
+                <div class="skeleton h-3.5 w-16 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- การ์ดสรุปงาน (TaskSummaryCard skeleton) -->
+      <div
+        class="skeleton-card rounded-2xl border border-slate-100 bg-white/80 p-3.5 shadow-sm"
+      >
+        <div class="flex items-center justify-between mb-2">
+          <div class="skeleton h-3.5 w-24 rounded"></div>
+          <div class="skeleton h-3 w-10 rounded-full"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="skeleton h-3 w-full rounded"></div>
+          <div class="skeleton h-3 w-4/5 rounded"></div>
+          <div class="skeleton h-3 w-3/5 rounded"></div>
+        </div>
+      </div>
+
+      <!-- การ์ดให้คะแนน (TaskSatisfactionCard skeleton) -->
+      <div
+        class="skeleton-card rounded-2xl border border-slate-100 bg-white/80 p-3.5 shadow-sm"
+      >
+        <div class="flex items-center justify-between mb-3">
+          <div class="skeleton h-3.5 w-28 rounded"></div>
+          <div class="skeleton h-3 w-16 rounded-full"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div
+            v-for="i in 5"
+            :key="i"
+            class="skeleton h-6 w-6 rounded-full"
+          ></div>
+          <div class="flex-1"></div>
+          <div class="skeleton h-7 w-20 rounded-full"></div>
+        </div>
+      </div>
+
+      <!-- สื่อหน้างาน skeleton -->
+      <section
+        class="skeleton-card rounded-2xl border border-slate-100 bg-white/80 p-3.5 shadow-sm"
+      >
+        <div class="mb-2 flex items-center justify-between">
+          <div class="inline-flex items-center gap-2">
+            <div class="skeleton h-4 w-4 rounded-full"></div>
+            <div class="skeleton h-3.5 w-20 rounded"></div>
+          </div>
+          <div class="skeleton h-3 w-14 rounded"></div>
+        </div>
+        <div class="flex gap-2 overflow-hidden">
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="skeleton h-32 min-w-[140px] rounded-2xl"
+          ></div>
+        </div>
+      </section>
+
+      <!-- ไทม์ไลน์การดำเนินการ skeleton -->
+      <section
+        class="skeleton-card rounded-2xl border border-slate-100 bg-white/80 p-3.5 shadow-sm"
+      >
+        <div class="mb-3 flex items-center justify-between">
+          <div class="inline-flex items-center gap-2">
+            <div class="skeleton h-4 w-4 rounded-full"></div>
+            <div class="skeleton h-3.5 w-28 rounded"></div>
+          </div>
+          <div class="skeleton h-3 w-20 rounded"></div>
+        </div>
+
+        <!-- เส้น timeline -->
+        <div class="relative">
+          <div
+            class="pointer-events-none absolute left-[13px] top-3 bottom-3 w-[2px] bg-slate-200"
+          ></div>
+
+          <div
+            v-for="i in 4"
+            :key="i"
+            class="relative flex gap-3 pb-4 last:pb-0"
+          >
+            <!-- จุดสถานะ -->
+            <div
+              class="relative mt-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-200 bg-white"
+            >
+              <div class="skeleton h-4 w-4 rounded-full"></div>
+            </div>
+
+            <!-- การ์ดข้อความ -->
+            <div class="flex-1 rounded-2xl px-3 py-2.5">
+              <div class="skeleton h-3.5 w-32 rounded mb-1"></div>
+              <div class="skeleton h-3 w-4/5 rounded mb-1"></div>
+              <div class="skeleton h-3 w-3/5 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- คอมเมนต์หน้างาน skeleton -->
+      <section
+        class="skeleton-card rounded-2xl border border-slate-100 bg-white/80 p-3.5 shadow-sm mb-2"
+      >
+        <div class="mb-3 flex items-center justify-between">
+          <div class="inline-flex items-center gap-2">
+            <div class="skeleton h-4 w-4 rounded-full"></div>
+            <div class="skeleton h-3.5 w-28 rounded"></div>
+          </div>
+          <div class="skeleton h-3 w-20 rounded"></div>
+        </div>
+
+        <!-- ช่องคอมเมนต์ -->
+        <div class="flex gap-3">
+          <div class="skeleton h-9 w-9 rounded-full"></div>
+          <div class="flex-1 space-y-2">
+            <div class="skeleton h-16 w-full rounded-2xl"></div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <div class="skeleton h-8 w-8 rounded-full"></div>
+                <div class="skeleton h-8 w-8 rounded-full"></div>
+              </div>
+              <div class="skeleton h-8 w-24 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- คอมเมนต์ตัวอย่าง -->
+        <div class="mt-4 space-y-3">
+          <div v-for="i in 2" :key="i" class="flex gap-3">
+            <div class="skeleton h-8 w-8 rounded-full"></div>
+            <div class="flex-1 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="skeleton h-3 w-24 rounded"></div>
+                <div class="skeleton h-2.5 w-16 rounded"></div>
+              </div>
+              <div class="skeleton h-3 w-full rounded"></div>
+              <div class="skeleton h-3 w-4/5 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section v-else class="mt-0 px-0">
+      <LayoutTaskDetail :task="detailTask" />
+    </section>
+  </div>
 </template>
 
 <script setup lang="ts">
 import LayoutTaskDetail from "@/components/share/task/detail/index.vue";
 import { taskApi } from "@/services/task.api";
 import type { TaskDetail } from "@/types/task";
+import { useTaskStore } from "@/stores/task.stores";
 
 definePageMeta({ layout: "blank" });
 
 const route = useRoute();
+const taskStore = useTaskStore();
 
+const { getItem } = storeToRefs(taskStore);
 const taskId = computed(() => route.params.id as string);
+const detailTask = ref<TaskDetail | null>(null);
 
-const {
-  data: detailTask,
-  pending: loading,
-  error,
-  refresh,
-} = await useAsyncData<TaskDetail | null>(
-  () => `task-detail-${taskId.value}`, //key ผูกกับ id
-  () => taskApi.getDetail(taskId.value),
-  {
-    default: () => null,
-    watch: [taskId], //ถ้า id เปลี่ยนให้ refetch
-  }
-);
-
-console.log(JSON.stringify(detailTask.value, null, 2));
-</script> -->
-
-
-<!-- pages/task/[id].vue -->
-<template>
-  <div class="min-h-screen bg-slate-50 pb-6">
-    <header class="bg-slate-50/80 backdrop-blur">
-      <!-- แถวบน: ปุ่ม back + ชื่อหน้า + หมายเลขใบงาน -->
-      <div class="flex items-center justify-between px-4 pt-3 pb-2">
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            class="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm"
-            @click="goBack"
-          >
-            <ArrowLeft class="h-4 w-4 text-slate-700" />
-          </button>
-
-          <span class="text-[15px] font-semibold text-slate-900">
-            รายละเอียดงาน
-          </span>
-        </div>
-
-        <!-- ชิปหมายเลขงาน -->
-        <span class="px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
-          {{ task.id }}
-        </span>
-      </div>
-
-      <!-- การ์ดข้อมูลงาน -->
-      <TaskDetailHeader :task="task" />
-    </header>
-
-    <!-- 📝 การ์ดสรุปงาน (ระหว่าง header กับ rating) -->
-    <TaskSummaryCard :summary-saved="summarySaved" @click="openSummaryModal" />
-
-    <!-- ⭐ ส่วนให้คะแนน ระหว่าง header กับ main -->
-    <TaskSatisfactionCard
-      :can-rate-this-task="canRateThisTask"
-      :has-rated-this-task="hasRatedThisTask"
-      :average-rating="averageRating"
-      :loading="ratingLoading"
-      @click="openRatingModal"
-    />
-
-    <main class="mt-1 space-y-4 px-4">
-      <!-- สื่อหน้างาน: รูป / วิดีโอ -->
-      <section
-        v-if="task.media && task.media.length"
-        class="rounded-2xl bg-white p-3.5 shadow-sm"
-      >
-        <div class="mb-2 flex items-center justify-between">
-          <div
-            class="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-900"
-          >
-            <ImageIcon class="h-4 w-4 text-sky-500" />
-            <span>สื่อหน้างาน</span>
-          </div>
-          <span class="text-[11px] text-slate-400">
-            {{ task.media.length }} รายการ
-          </span>
-        </div>
-
-        <div class="flex gap-2 overflow-x-auto pb-1">
-          <button
-            v-for="(item, index) in task.media"
-            :key="index"
-            type="button"
-            class="relative h-32 min-w-[140px] overflow-hidden rounded-2xl bg-slate-100 focus:outline-none"
-            @click="openPreview(item)"
-          >
-            <!-- รูปภาพ -->
-            <img
-              v-if="item.type === 'image'"
-              :src="item.url"
-              :alt="`รูปหน้างาน ${index + 1}`"
-              class="h-full w-full cursor-zoom-in object-cover"
-            />
-
-            <!-- วิดีโอ -->
-            <video
-              v-else
-              :src="item.url"
-              class="h-full w-full object-cover"
-              muted
-              playsinline
-            ></video>
-
-            <!-- badge ประเภทสื่อ -->
-            <span
-              class="absolute bottom-1 right-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white"
-            >
-              {{ item.type === "image" ? "รูปภาพ" : "วิดีโอ" }}
-            </span>
-          </button>
-        </div>
-      </section>
-
-      <!-- ไทม์ไลน์การดำเนินการ -->
-      <section class="rounded-2xl bg-white p-3.5 shadow-sm">
-        <div class="mb-3 flex items-center justify-between">
-          <div
-            class="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-900"
-          >
-            <Clock class="h-4 w-4 text-emerald-600" />
-            <span>ไทม์ไลน์การดำเนินการ</span>
-          </div>
-          <span class="text-[11px] text-slate-400">
-            ขั้นตอนที่ {{ currentStep }} / 5
-          </span>
-        </div>
-
-        <div class="relative">
-          <!-- เส้นตั้ง -->
-          <div
-            class="pointer-events-none absolute left-[13px] top-3 bottom-3 w-[2px] bg-slate-200"
-          ></div>
-
-          <!-- ใช้ stepsDisplay ที่เรียง 5 → 1 -->
-          <div
-            v-for="step in stepsDisplay"
-            :key="step.key"
-            class="relative flex gap-3 pb-4 last:pb-0"
-          >
-            <!-- จุดสถานะ + รูปภาพไอคอนออนไลน์ -->
-            <div
-              class="relative mt-1 flex h-7 w-7 items-center justify-center rounded-full border-2 bg-white"
-              :class="bulletClass(step.number)"
-            >
-              <!-- รูปไอคอนหลัก -->
-              <img
-                :src="step.icon"
-                :alt="step.label"
-                class="h-4 w-4 object-contain"
-              />
-
-              <!-- ติ๊กถูกซ้อนเฉพาะขั้นที่ทำเสร็จแล้ว -->
-              <div
-                v-if="step.number < currentStep"
-                class="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500 shadow-sm"
-              >
-                <Check class="h-2.5 w-2.5 text-white" />
-              </div>
-            </div>
-
-            <!-- การ์ดข้อความ -->
-            <div
-              class="flex-1 rounded-2xl px-3 py-2.5 text-left"
-              :class="cardClass(step.number)"
-            >
-              <p
-                v-if="step.number === currentStep"
-                class="mb-0.5 text-[11px] font-medium uppercase tracking-[0.18em] text-indigo-500"
-              >
-                ขั้นตอนปัจจุบัน
-              </p>
-              <p class="text-[13px] font-semibold text-slate-900">
-                {{ step.label }}
-              </p>
-              <p
-                v-if="stepDescription(step.number)"
-                class="mt-0.5 text-[11px] leading-snug text-slate-500 whitespace-pre-line"
-              >
-                {{ stepDescription(step.number) }}
-              </p>
-
-              <!-- ปุ่มดูตำแหน่งช่าง เฉพาะขั้น on_the_way -->
-              <div
-                v-if="step.key === 'on_the_way'"
-                class="mt-2 flex items-center justify-between"
-              >
-                <p class="text-[10px] text-slate-500">
-                  แตะเพื่อดูตำแหน่งของช่างบนแผนที่
-                </p>
-                <button
-                  type="button"
-                  class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm active:scale-95"
-                  @click.stop="openStaffLocationModal"
-                >
-                  <MapPin class="h-3.5 w-3.5 text-white" />
-                  <span>ดูตำแหน่ง</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- คอมเมนต์หน้างาน -->
-      <section class="rounded-2xl bg-white p-3.5 shadow-sm">
-        <div class="mb-3 flex items-center justify-between">
-          <div
-            class="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-900"
-          >
-            <MessageCircle class="h-4 w-4 text-indigo-500" />
-            <span>คอมเมนต์หน้างาน</span>
-          </div>
-          <span class="text-[11px] text-slate-400">
-            {{ commentCount }} ความเห็น
-          </span>
-        </div>
-
-        <!-- ช่องกรอกคอมเมนต์ใหม่ -->
-        <div class="flex gap-3">
-          <!-- mock avatar -->
-          <div
-            class="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700"
-          >
-            ช่าง
-          </div>
-
-          <div class="flex-1">
-            <textarea
-              v-model="newCommentText"
-              rows="2"
-              class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              placeholder="เขียนคอมเมนต์ถึงลูกบ้าน หรือบันทึกหมายเหตุหน้างาน..."
-            ></textarea>
-
-            <!-- preview media ที่เลือก -->
-            <div
-              v-if="newCommentMedia.length"
-              class="mt-2 flex gap-2 overflow-x-auto"
-            >
-              <div
-                v-for="(m, index) in newCommentMedia"
-                :key="index"
-                class="relative h-16 w-20 overflow-hidden rounded-xl bg-slate-100"
-              >
-                <img
-                  v-if="m.type === 'image'"
-                  :src="m.url"
-                  class="h-full w-full object-cover"
-                />
-                <video
-                  v-else
-                  :src="m.url"
-                  class="h-full w-full object-cover"
-                  muted
-                  playsinline
-                ></video>
-
-                <button
-                  type="button"
-                  class="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] text-white"
-                  @click="removeNewCommentMedia(index)"
-                >
-                  <X class="h-3 w-3" />
-                </button>
-              </div>
-            </div>
-
-            <div class="mt-2 flex items-center justify-between">
-              <div class="flex items-center gap-1.5">
-                <!-- ปุ่มแนบรูป -->
-                <label
-                  class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
-                >
-                  <ImageIcon class="h-4 w-4" />
-                  <input
-                    type="file"
-                    class="hidden"
-                    multiple
-                    accept="image/*"
-                    @change="handleNewCommentFiles($event, 'image')"
-                  />
-                </label>
-
-                <!-- ปุ่มแนบวิดีโอ -->
-                <label
-                  class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"
-                >
-                  <Video class="h-4 w-4" />
-                  <input
-                    type="file"
-                    class="hidden"
-                    multiple
-                    accept="video/*"
-                    @change="handleNewCommentFiles($event, 'video')"
-                  />
-                </label>
-              </div>
-
-              <button
-                type="button"
-                class="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1.5 text-[11px] font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:bg-slate-300"
-                :disabled="!canSubmitComment"
-                @click="submitComment"
-              >
-                <Send class="h-3.5 w-3.5" />
-                <span>ส่งคอมเมนต์</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- รายการคอมเมนต์ -->
-        <div
-          v-if="commentsForTask.length"
-          class="mt-4 border-t border-slate-100 pt-3 space-y-3"
-        >
-          <article
-            v-for="comment in commentsForTask"
-            :key="comment.id"
-            class="flex gap-3"
-          >
-            <!-- avatar จากตัวอักษรชื่อ -->
-            <div
-              class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-semibold"
-              :class="
-                comment.role === 'operator'
-                  ? 'bg-indigo-100 text-indigo-700'
-                  : 'bg-amber-100 text-amber-700'
-              "
-            >
-              {{ getInitials(comment.author) }}
-            </div>
-
-            <div
-              class="flex-1 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2.5"
-            >
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-1.5">
-                  <p class="text-[12px] font-semibold text-slate-900">
-                    {{ comment.author }}
-                  </p>
-                  <span
-                    v-if="comment.role === 'operator'"
-                    class="rounded-full bg-indigo-50 px-2 py-[2px] text-[10px] font-medium text-indigo-600"
-                  >
-                    เจ้าหน้าที่
-                  </span>
-                  <span
-                    v-else
-                    class="rounded-full bg-amber-50 px-2 py-[2px] text-[10px] font-medium text-amber-700"
-                  >
-                    ลูกบ้าน
-                  </span>
-                </div>
-
-                <span class="text-[10px] text-slate-400">
-                  {{ formatCommentTime(comment.createdAt) }}
-                </span>
-              </div>
-
-              <p
-                v-if="comment.message"
-                class="mt-1 text-[12px] leading-snug text-slate-800 whitespace-pre-line"
-              >
-                {{ comment.message }}
-              </p>
-
-              <div
-                v-if="comment.media && comment.media.length"
-                class="mt-2 flex flex-wrap gap-2"
-              >
-                <button
-                  v-for="m in comment.media"
-                  :key="m.id"
-                  type="button"
-                  class="relative h-16 w-20 overflow-hidden rounded-xl bg-slate-100"
-                  @click="openPreview(m)"
-                >
-                  <img
-                    v-if="m.type === 'image'"
-                    :src="m.url"
-                    class="h-full w-full object-cover"
-                  />
-                  <video
-                    v-else
-                    :src="m.url"
-                    class="h-full w-full object-cover"
-                    muted
-                    playsinline
-                  ></video>
-
-                  <span
-                    class="absolute bottom-1 right-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[9px] font-medium text-white"
-                  >
-                    {{ m.type === "image" ? "รูปภาพ" : "วิดีโอ" }}
-                  </span>
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- ไม่มีคอมเมนต์ -->
-        <p v-else class="mt-3 text-center text-[11px] text-slate-400">
-          ยังไม่มีคอมเมนต์สำหรับงานนี้
-        </p>
-      </section>
-    </main>
-
-    <!-- 🗺 STAFF LOCATION MAP MODAL (Google Maps JS API) -->
-    <div
-      v-if="staffLocationModalOpen"
-      class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center"
-      @click.self="closeStaffLocationModal"
-    >
-      <div
-        class="h-[70vh] w-full max-w-md rounded-t-3xl bg-white shadow-lg sm:h-[70vh] sm:rounded-2xl"
-      >
-        <!-- header -->
-        <div class="flex items-center justify-between px-4 pt-3 pb-2">
-          <div class="flex items-center gap-2">
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50"
-            >
-              <MapPin class="h-4 w-4 text-emerald-600" />
-            </div>
-            <div>
-              <p class="text-[13px] font-semibold text-slate-900">
-                ตำแหน่งช่าง (เรียลไทม์)
-              </p>
-              <p class="text-[10px] text-slate-500">
-                {{ staffLocationTimeLabel }}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500"
-            @click="closeStaffLocationModal"
-          >
-            <X class="h-4 w-4" />
-          </button>
-        </div>
-
-        <div class="h-[1px] bg-slate-100"></div>
-
-        <!-- container ของ Google Map -->
-        <div class="h-[calc(100%-49px)] w-full">
-          <div ref="mapContainer" class="h-full w-full"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rating Modal -->
-    <TaskRatingFlow
-      v-model:open="ratingModalOpen"
-      v-model:success-open="ratingSuccessModalOpen"
-      :rating-loading="ratingLoading"
-      :has-rated-this-task="hasRatedThisTask"
-      :can-submit-rating="canSubmitRating"
-      :rating-items="ratingItems"
-      :temp-rating-scores="tempRatingScores"
-      :set-temp-score="setTempScore"
-      :submit-rating="submitRating"
-      :close-rating-modal="closeRatingModal"
-    />
-
-    <!-- 📝 SUMMARY MODAL -->
-    <ModalBottom v-model="summaryModalOpen">
-      <TaskSummaryDialog
-        :summaryLoading="summaryLoading"
-        :summarySaved="summarySaved"
-        :canSubmitSummary="canSubmitSummary"
-        :workSummary="workSummary"
-        :saveWorkSummary="saveWorkSummary"
-        :closeSummaryModal="closeSummaryModal"
-        :formatSummaryDateTime="formatSummaryDateTime"
-      />
-    </ModalBottom>
-
-    <!-- ✅ SUMMARY SUCCESS MODAL -->
-
-    <ModalBottom v-model="summarySuccessModalOpen">
-      <BaseStatusModal
-        variant="success"
-        title="บันทึกสรุปงานสำเร็จ"
-        message="ระบบได้บันทึกข้อมูลสรุปงานสำหรับงานนี้เรียบร้อยแล้ว"
-        button-text="ปิด"
-        @close="summarySuccessModalOpen = false"
-      />
-    </ModalBottom>
-
-    <!-- FULLSCREEN MEDIA PREVIEW -->
-    <div
-      v-if="previewOpen && previewMedia"
-      class="fixed inset-0 z-40 flex items-center justify-center bg-black/80"
-      @click.self="closePreview"
-    >
-      <button
-        type="button"
-        class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white shadow-lg"
-        @click="closePreview"
-      >
-        <X class="h-5 w-5" />
-      </button>
-
-      <img
-        v-if="previewMedia.type === 'image'"
-        :src="previewMedia.url"
-        alt="ตัวอย่างรูปหน้างาน"
-        class="max-h-[90vh] max-w-[100vw] object-contain"
-      />
-      <video
-        v-else
-        :src="previewMedia.url"
-        controls
-        autoplay
-        class="max-h-[90vh] max-w-[100vw]"
-      ></video>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { computed, ref, watch, nextTick } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import {
-  ArrowLeft,
-  MapPin,
-  Clock,
-  Image as ImageIcon,
-  X,
-  Check,
-  MessageCircle,
-  Send,
-  Video,
-} from "lucide-vue-next";
-import TaskDetailHeader from "@/components/share/task/detail/TaskDetailHeader.vue";
-import TaskSummaryCard from "@/components/employee/task/TaskSummaryCard.vue";
-import TaskSatisfactionCard from "@/components/customer/task/TaskSatisfactionCard.vue";
-import TaskRatingDialog from "@/components/customer/task/rating/TaskRatingDialog.vue";
-import TaskSummaryDialog from "@/components/employee/task/TaskSummaryDialog.vue";
-import ModalBottom from "@/components/share/ModalBottom.vue";
-import BaseStatusModal from "@/components/share/status/BaseStatusModal.vue";
-import ResponsiveModal from "@/components/share/ResponsiveModal.vue";
-import { useRatingFlow } from "@/composables/task/customer/rating/useRatingFlow";
-import TaskRatingFlow from "@/components/customer/task/rating/TaskRatingFlow.vue";
-
-definePageMeta({
-  layout: "blank",
-});
-
-// setPageLayout(isMobile.value ? "blank" : "default");
-
-// บอก TS ว่าจะมีตัวแปร google มาจาก script ภายนอก
-declare const google: any;
-
-type TaskStatus = "in_progress" | "done";
-type MediaType = "image" | "video";
-
-interface TaskMedia {
-  type: MediaType;
-  url: string;
-}
-
-interface StepRuntimeInfo {
-  step: number;
-  finishedAt?: string;
-  dueAt?: string;
-  operator?: string;
-}
-
-interface TimelineStep {
-  key: string;
-  label: string;
-  description?: string;
-  number: number;
-  icon: string; // รูปภาพจาก online
-}
-
-interface TaskDetail {
-  id: string;
-  room: string;
-  description: string;
-  status: TaskStatus;
-  updatedAt: string;
-  media: TaskMedia[];
-  currentStep: number;
-  timeline?: StepRuntimeInfo[];
-}
-
-/* ---------- comment types ---------- */
-
-interface CommentMedia extends TaskMedia {
-  id: string;
-}
-
-interface TaskComment {
-  id: string;
-  taskId: string;
-  author: string;
-  role: "customer" | "operator";
-  createdAt: string;
-  message: string;
-  media: CommentMedia[];
-}
-
-/* ---------------- base steps + online icons ---------------- */
-
-const baseSteps: Omit<TimelineStep, "number">[] = [
-  {
-    key: "received",
-    label: "รับเรื่อง",
-    description: "ระบบรับแจ้งปัญหาจากลูกค้าเรียบร้อยแล้ว",
-    icon: "https://img.icons8.com/color/48/inbox.png",
-  },
-  {
-    key: "prepare",
-    label: "เตรียมอุปกรณ์แก้ไข",
-    description: "เจ้าหน้าที่เตรียมอุปกรณ์และอะไหล่ที่จำเป็น",
-    icon: "https://img.icons8.com/color/48/maintenance.png",
-  },
-  {
-    key: "on_the_way",
-    label: "อยู่ระหว่างเดินทาง",
-    description: "ช่างกำลังเดินทางไปยังห้องของลูกค้า",
-    icon: "https://img.icons8.com/color/48/road.png",
-  },
-  {
-    key: "fixing",
-    label: "กำลังดำเนินการแก้ไข",
-    description: "ช่างกำลังตรวจสอบและแก้ไขปัญหาที่หน้างาน",
-    icon: "https://img.icons8.com/color/48/service.png",
-  },
-  {
-    key: "done",
-    label: "ดำเนินการแก้ไขเรียบร้อยแล้ว",
-    description: "ปิดงานเรียบร้อย สามารถติดตามผลเพิ่มเติมได้หากมีปัญหา",
-    icon: "https://img.icons8.com/color/48/checkmark--v1.png",
-  },
-];
-
-const steps: TimelineStep[] = baseSteps.map((s, idx) => ({
-  ...s,
-  number: idx + 1,
-}));
-
-const stepsDisplay = computed(() => [...steps].reverse());
-
-/* ---------------- mock data ตัวอย่าง ---------------- */
-
-const allTasks: TaskDetail[] = [
-  {
-    id: "TSK-0001",
-    room: "1205",
-    description: "แอร์ไม่เย็น มีเสียงดังตอนเปิดโหมดเย็น ขอช่างเช็กด่วน",
-    status: "in_progress",
-    updatedAt: "2025-11-13T09:24:00+07:00",
-    currentStep: 4,
-    media: [
-      {
-        type: "image",
-        url: "https://images.pexels.com/photos/3768913/pexels-photo-3768913.jpeg",
-      },
-      {
-        type: "image",
-        url: "https://images.pexels.com/photos/3968102/pexels-photo-3968102.jpeg",
-      },
-      {
-        type: "video",
-        url: "https://www.w3schools.com/html/mov_bbb.mp4",
-      },
-    ],
-    timeline: [
-      {
-        step: 1,
-        finishedAt: "2025-11-10T10:12:26+07:00",
-        operator: "นางสาว ภัทธาวดี อภิชิรัญโชติ",
-      },
-      {
-        step: 2,
-        finishedAt: "2025-11-10T10:18:04+07:00",
-        operator: "นางสาว ภัทธาวดี อภิชิรัญโชติ",
-      },
-      {
-        step: 3,
-        finishedAt: "2025-11-12T08:35:46+07:00",
-        operator: "นาย สรวิชญ์ สมจิตร",
-      },
-      {
-        step: 4,
-        dueAt: "2025-11-30T00:00:00+07:00",
-      },
-      {
-        step: 5,
-        dueAt: "2025-12-01T00:00:00+07:00",
-      },
-    ],
-  },
-  {
-    id: "TSK-0002",
-    room: "803",
-    description: "ไฟในห้องน้ำไม่ติด อาจเป็นที่เบรกเกอร์",
-    status: "in_progress",
-    updatedAt: "2025-11-13T08:10:00+07:00",
-    currentStep: 2,
-    media: [
-      {
-        type: "image",
-        url: "https://images.pexels.com/photos/4107014/pexels-photo-4107014.jpeg",
-      },
-    ],
-  },
-  {
-    id: "TSK-0003",
-    room: "1502",
-    description: "ประตูระเบียงปิดไม่สนิท มีเสียงลมแรงตอนกลางคืน",
-    status: "in_progress",
-    updatedAt: "2025-11-12T15:32:00+07:00",
-    currentStep: 3,
-    media: [
-      {
-        type: "video",
-        url: "https://www.w3schools.com/html/mov_bbb.mp4",
-      },
-    ],
-  },
-  {
-    id: "TSK-0004",
-    room: "607",
-    description: "เปลี่ยนรีโมตทีวี ลูกค้าทำตกแล้วใช้งานไม่ได้",
-    status: "done",
-    updatedAt: "2025-11-12T10:18:00+07:00",
-    currentStep: 5,
-    media: [],
-  },
-  {
-    id: "TSK-0005",
-    room: "302",
-    description: "ฝักบัวรั่ว น้ำกระเด็นออกนอกโซนอาบน้ำ",
-    status: "in_progress",
-    updatedAt: "2025-11-11T18:42:00+07:00",
-    currentStep: 1,
-    media: [],
-  },
-];
-
-/* -------- mock comments (จำลองข้อมูลคอมเมนต์) -------- */
-
-const allComments = ref<TaskComment[]>([
-  {
-    id: "CMT-0001",
-    taskId: "TSK-0001",
-    author: "ลูกบ้าน 1205",
-    role: "customer",
-    createdAt: "2025-11-13T09:15:00+07:00",
-    message:
-      "ตอนนี้แอร์มีเสียงดังต่อเนื่องเลยค่ะ ถ้าเป็นไปได้รบกวนเข้ามาดูภายในช่วงเช้านี้นะคะ",
-    media: [
-      {
-        id: "CMT-0001-M1",
-        type: "video",
-        url: "https://www.w3schools.com/html/mov_bbb.mp4",
-      },
-    ],
-  },
-  {
-    id: "CMT-0002",
-    taskId: "TSK-0001",
-    author: "นาย สรวิชญ์ สมจิตร",
-    role: "operator",
-    createdAt: "2025-11-13T09:20:00+07:00",
-    message:
-      "รับทราบครับ ช่างจะขึ้นไปภายใน 10:30 น. ถ้าถึงแล้วจะโทรแจ้งลูกบ้านอีกครั้งครับ",
-    media: [],
-  },
-  {
-    id: "CMT-0003",
-    taskId: "TSK-0002",
-    author: "ลูกบ้าน 803",
-    role: "customer",
-    createdAt: "2025-11-13T08:05:00+07:00",
-    message: "แนบรูปตู้ไฟให้ครับ เหมือนเบรกเกอร์ห้องน้ำจะตกอยู่",
-    media: [
-      {
-        id: "CMT-0003-M1",
-        type: "image",
-        url: "https://images.pexels.com/photos/4107014/pexels-photo-4107014.jpeg",
-      },
-    ],
-  },
-]);
-
-/* ---------------- logic ทั่วไป ---------------- */
-
-const route = useRoute();
-const router = useRouter();
-
-const taskId = computed(() => route.params.id as string);
-
-const task = computed(() => {
-  const found = allTasks.find((t) => t.id === taskId.value);
-  return found || allTasks[0];
-});
-
-const currentStep = computed(() => task.value.currentStep);
-
-const thaiMonthsShort = [
-  "ม.ค.",
-  "ก.พ.",
-  "มี.ค.",
-  "เม.ย.",
-  "พ.ค.",
-  "มิ.ย.",
-  "ก.ค.",
-  "ส.ค.",
-  "ก.ย.",
-  "ต.ค.",
-  "พ.ย.",
-  "ธ.ค.",
-];
-
-const formatThaiDate = (isoString: string) => {
-  const date = new Date(isoString);
-  const d = date.getDate().toString().padStart(2, "0");
-  const m = thaiMonthsShort[date.getMonth()];
-  const y = date.getFullYear() + 543;
-  return `${d} ${m} ${y}`;
-};
-
-const formatThaiDateTime = (isoString: string) => {
-  const date = new Date(isoString);
-  const datePart = formatThaiDate(isoString);
-  const hh = date.getHours().toString().padStart(2, "0");
-  const mm = date.getMinutes().toString().padStart(2, "0");
-  const ss = date.getSeconds().toString().padStart(2, "0");
-  return `${datePart} ${hh}:${mm}:${ss}`;
-};
-
-const formatUpdatedAt = (isoString: string) => {
-  const date = new Date(isoString);
-  const now = new Date();
-
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const timePart = `${hours}:${minutes}`;
-
-  if (diffDays === 0) return `วันนี้ · ${timePart}`;
-  if (diffDays === 1) return `เมื่อวาน · ${timePart}`;
-  if (diffDays <= 7) return `${diffDays} วันก่อน · ${timePart}`;
-
-  const d = date.getDate().toString().padStart(2, "0");
-  const m = thaiMonthsShort[date.getMonth()];
-  const buddhistYear = date.getFullYear() + 543;
-  return `${d} ${m} ${buddhistYear} ${timePart}`;
-};
-
-const updatedLabel = computed(() => formatUpdatedAt(task.value.updatedAt));
-
-const stepRuntimeMap = computed(() => {
-  const map = new Map<number, StepRuntimeInfo>();
-  (task.value.timeline || []).forEach((info) => {
-    map.set(info.step, info);
-  });
-  return map;
-});
-
-const getDefaultStepDescription = (stepNumber: number) => {
-  const s = steps.find((st) => st.number === stepNumber);
-  return s?.description || "";
-};
-
-const stepDescription = (stepNumber: number) => {
-  const info = stepRuntimeMap.value.get(stepNumber);
-  if (info) {
-    if (info.finishedAt) {
-      const opLine = info.operator ? `\nผู้ดำเนินงาน ${info.operator}` : "";
-      return `ดำเนินการแล้วเสร็จ ${formatThaiDateTime(
-        info.finishedAt
-      )}${opLine}`;
-    }
-    if (info.dueAt) {
-      return `วันกำหนดแล้วเสร็จ ${formatThaiDate(info.dueAt)}`;
-    }
-  }
-  return getDefaultStepDescription(stepNumber);
-};
-
-const bulletClass = (stepNumber: number) => {
-  if (stepNumber < currentStep.value) {
-    return "border-emerald-500 bg-emerald-50";
-  }
-  if (stepNumber === currentStep.value) {
-    return "bg-indigo-50 border border-indigo-200 shadow-sm";
-  }
-  return "border-slate-200 bg-slate-50 opacity-80";
-};
-
-const cardClass = (stepNumber: number) => {
-  if (stepNumber < currentStep.value) {
-    return "bg-emerald-50 border border-emerald-100";
-  }
-  if (stepNumber === currentStep.value) {
-    return "bg-indigo-50 border border-indigo-100";
-  }
-  return "bg-slate-50 border border-slate-100 opacity-90";
-};
-
-
-interface PreviewMedia {
-  type: MediaType;
-  url: string;
-}
-
-const previewOpen = ref(false);
-const previewMedia = ref<PreviewMedia | null>(null);
-
-const openPreview = (media: TaskMedia | CommentMedia) => {
-  previewMedia.value = { type: media.type, url: media.url };
-  previewOpen.value = true;
-};
-
-const closePreview = () => {
-  previewOpen.value = false;
-  previewMedia.value = null;
-};
-
-const goBack = () => {
-  router.back();
-};
-
-/* --------- comments computed & helpers --------- */
-
-const commentsForTask = computed(() =>
-  allComments.value.filter((c) => c.taskId === task.value.id)
-);
-
-const commentCount = computed(() => commentsForTask.value.length);
-
-const formatCommentTime = (isoString: string) => {
-  return formatUpdatedAt(isoString);
-};
-
-const getInitials = (name: string) => {
-  const parts = name.trim().split(" ").filter(Boolean);
-  if (!parts.length) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2);
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-};
-
-/* --------- new comment state & actions --------- */
-
-interface NewCommentMedia {
-  type: MediaType;
-  url: string;
-}
-
-const newCommentText = ref("");
-const newCommentMedia = ref<NewCommentMedia[]>([]);
-
-const handleNewCommentFiles = (event: Event, type: MediaType) => {
-  const target = event.target as HTMLInputElement;
-  if (!target.files?.length) return;
-
-  Array.from(target.files).forEach((file) => {
-    const url = URL.createObjectURL(file);
-    newCommentMedia.value.push({ type, url });
-  });
-
-  target.value = "";
-};
-
-const removeNewCommentMedia = (index: number) => {
-  newCommentMedia.value.splice(index, 1);
-};
-
-const canSubmitComment = computed(
+const { data, pending, error, refresh } =  useAsyncData<TaskDetail | null>(
   () =>
-    newCommentText.value.trim().length > 0 || newCommentMedia.value.length > 0
-);
+    getItem.value
+      ? `task-timeline-${taskId.value}`
+      : `task-detail-${taskId.value}`,
+  async () => {
+    const id = taskId.value;
+    if (!id) return null;
 
-const submitComment = () => {
-  if (!canSubmitComment.value) return;
+    // กรณีมีของใน store → ใช้ของเก่า + ดึง timeline เพิ่ม
+    if (getItem.value) {
+      const timeline = await taskApi.getTimeline(id);
 
-  const nowIso = new Date().toISOString();
-  const baseId = Date.now();
-
-  const newItem: TaskComment = {
-    id: `CMT-${baseId}`,
-    taskId: task.value.id,
-    author: "ช่างส่วนกลาง",
-    role: "operator",
-    createdAt: nowIso,
-    message: newCommentText.value.trim(),
-    media: newCommentMedia.value.map((m, index) => ({
-      id: `CMT-${baseId}-M${index + 1}`,
-      type: m.type,
-      url: m.url,
-    })),
-  };
-
-  allComments.value = [newItem, ...allComments.value];
-
-  newCommentText.value = "";
-  newCommentMedia.value = [];
-};
-
-/* ---------- rating config ---------- */
-
-interface RatingItem {
-  id: string;
-  label: string;
-}
-
-// const taskRatings = ref<Record<string, number[]>>({
-//   "TSK-0004": [5, 5, 4, 5, 4, 5],
-// });
-
-/* ---------- rating modal state ---------- */
-
-const {
-  ratingModalOpen,
-  ratingSuccessModalOpen,
-  ratingLoading,
-
-  ratingItems,
-  tempRatingScores,
-
-  canRateThisTask,
-  currentRatingScores,
-  hasRatedThisTask,
-  averageRating,
-  canSubmitRating,
-
-  setTempScore,
-  openRatingModal,
-  closeRatingModal,
-  submitRating,
-} = useRatingFlow(task);
-
-/* ---------- ตำแหน่งช่าง + Google Maps JS API ---------- */
-
-interface StaffLocation {
-  lat: number;
-  lng: number;
-  updatedAt: string;
-}
-
-const staffLocation = ref<StaffLocation>({
-  lat: 13.7563,
-  lng: 100.5018,
-  updatedAt: new Date().toISOString(),
-});
-
-const staffLocationModalOpen = ref(false);
-
-const openStaffLocationModal = () => {
-  staffLocationModalOpen.value = true;
-};
-
-const closeStaffLocationModal = () => {
-  staffLocationModalOpen.value = false;
-
-  // reset map เพื่อไม่ให้มีปัญหาเปิด-ปิดแล้วไม่ขึ้น
-  if (staffMarker.value) {
-    staffMarker.value.setMap(null);
-    staffMarker.value = null;
-  }
-  if (mapInstance.value) {
-    mapInstance.value = null;
-  }
-};
-
-const staffLocationTimeLabel = computed(
-  () => `อัปเดตล่าสุด ${formatUpdatedAt(staffLocation.value.updatedAt)}`
-);
-
-const mapContainer = ref<HTMLDivElement | null>(null);
-const mapInstance = ref<any>(null);
-const staffMarker = ref<any>(null);
-
-let googleMapsLoading: Promise<void> | null = null;
-
-const loadGoogleMaps = (): Promise<void> => {
-  if (typeof window === "undefined") return Promise.resolve();
-
-  const g = (window as any).google;
-  if (g && g.maps) {
-    return Promise.resolve();
-  }
-
-  if (!googleMapsLoading) {
-    googleMapsLoading = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src =
-        "https://maps.googleapis.com/maps/api/js?key=AIzaSyAgf48aWg9fr48mzGvoJqKSsNINYzBhdRQ&callback=initMap&language=th&region=TH";
-      script.async = true;
-      script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = () =>
-        reject(new Error("Google Maps JavaScript API failed to load"));
-      document.head.appendChild(script);
-    });
-  }
-
-  return googleMapsLoading;
-};
-
-const initMap = async () => {
-  if (!mapContainer.value) return;
-
-  await loadGoogleMaps();
-
-  const g = (window as any).google;
-  if (!g || !g.maps) return;
-
-  const { lat, lng } = staffLocation.value;
-
-  if (!mapInstance.value) {
-    mapInstance.value = new g.maps.Map(mapContainer.value, {
-      center: { lat, lng },
-      zoom: 17,
-      disableDefaultUI: false,
-      gestureHandling: "greedy",
-    });
-
-    staffMarker.value = new g.maps.Marker({
-      position: { lat, lng },
-      map: mapInstance.value,
-      title: "ตำแหน่งช่าง",
-    });
-  } else {
-    mapInstance.value.setCenter({ lat, lng });
-    if (staffMarker.value) {
-      staffMarker.value.setPosition({ lat, lng });
+      return {
+        ...(getItem.value as any),
+        ...timeline,
+      } as TaskDetail;
     }
-  }
-};
 
-watch(staffLocationModalOpen, async (open) => {
-  if (open) {
-    await nextTick();
-    await initMap();
+    // กรณีไม่มีใน store → ดึง detail เต็มจาก API
+    return await taskApi.getDetail(id);
+  },
+  {
+    // default: ถ้ามี detailTask จาก store อยู่แล้วก็ใช้เลย, ถ้าไม่มีก็ null
+    default: () => detailTask.value,
+    watch: [taskId], // เปลี่ยน id → ยิงใหม่ตามเงื่อนไขเดิม
   }
-});
+);
 
 watch(
-  staffLocation,
-  (loc) => {
-    if (!mapInstance.value || !staffMarker.value || !loc) return;
-    const pos = { lat: loc.lat, lng: loc.lng };
-    staffMarker.value.setPosition(pos);
-    mapInstance.value.setCenter(pos);
+  data,
+  (val) => {
+    if (val) {
+      detailTask.value = val;
+    } else if (!getItem.value) {
+      detailTask.value = null;
+    }
+
+    // console.log(JSON.stringify(detailTask.value, null, 2));
   },
-  { deep: true }
+  { immediate: true }
 );
 
-/* ---------- สรุปงาน (Summary) ---------- */
+const loading = computed(() => pending.value && !detailTask.value);
 
-const summaryModalOpen = ref(false);
-const summarySuccessModalOpen = ref(false);
-const summarySaved = ref(false);
-const summaryLoading = ref(false);
-
-const workSummary = ref({
-  startTime: "",
-  endTime: "",
-  process: "",
-  pending: "",
-});
-
-const openSummaryModal = () => {
-  summaryModalOpen.value = true;
-};
-
-const closeSummaryModal = () => {
-  if (summaryLoading.value) return; // กำลังโหลดห้ามปิด
-  summaryModalOpen.value = false;
-};
-const onSummaryBackdropClick = () => {
-  if (summaryLoading.value) return;
-  closeSummaryModal();
-};
-
-const canSubmitSummary = computed(() => {
-  return (
-    !!workSummary.value.startTime &&
-    !!workSummary.value.endTime &&
-    workSummary.value.process.trim().length > 0
-  );
-});
-
-const saveWorkSummary = async () => {
-  if (!canSubmitSummary.value || summarySaved.value || summaryLoading.value)
-    return;
-
-  summaryLoading.value = true;
-  try {
-    // 👇 ตรงนี้เอาไปเรียก API จริงของคุณได้เลย
-    // ตัวอย่างจำลอง request ช้า
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // ถ้าบันทึกสำเร็จ
-    summarySaved.value = true;
-    summaryModalOpen.value = false;
-    summarySuccessModalOpen.value = true;
-  } catch (error) {
-    console.error("saveWorkSummary error:", error);
-    // จะใส่ toast / alert ตรงนี้ก็ได้
-  } finally {
-    summaryLoading.value = false;
-  }
-};
-
-const formatSummaryDateTime = (value: string) => {
-  if (!value) return "";
-  // value จาก datetime-local จะเป็น "2025-11-17T09:30"
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  const d = date.getDate().toString().padStart(2, "0");
-  const m = thaiMonthsShort[date.getMonth()];
-  const y = date.getFullYear() + 543;
-  const hh = date.getHours().toString().padStart(2, "0");
-  const mm = date.getMinutes().toString().padStart(2, "0");
-  return `${d} ${m} ${y} ${hh}:${mm} น.`;
-};
 </script>
 
-<style scoped></style>
+<style scoped>
+/* วงกลมหมุนโหลด */
+.spinner {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  border-radius: 999px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: rgb(16 185 129 / 0.2);
+  border-top-color: rgb(16 185 129);
+  animation: spin 0.6s linear infinite;
+}
+
+/* พื้นที่ skeleton เทา ๆ */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: rgb(226 232 240);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.7) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-card {
+  backdrop-filter: blur(8px);
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>
