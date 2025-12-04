@@ -1,0 +1,1 @@
+import{O as e}from"./W0gg2iT2.js";const r=e("task",{state:()=>({list:null}),getters:{getItem:t=>t.list},actions:{setList(t){this.list={id:t.id??null,ticket:t.ticket,room:t.room,description:t.description,status:t.status,updatedAt:t.updatedAt,canRate:t.canRate,rating:t.rating,currentStep:t.currentStep,media:t.media}}}});export{r as u};
