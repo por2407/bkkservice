@@ -6,7 +6,7 @@
       class="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-t-3xl bg-white/80 sm:rounded-2xl"
     >
       <span class="loader"></span>
-      <p class="mt-2 text-[11px] text-slate-600">กำลังบันทึกคะแนน...</p>
+      <p class="mt-2 text-xs text-slate-600">กำลังบันทึกคะแนน...</p>
     </div>
     <!-- header modal -->
     <div class="mb-3 flex items-center justify-between">
@@ -17,12 +17,12 @@
           <Star class="h-4 w-4 text-amber-500 fill-amber-500" />
         </div>
         <div>
-          <p class="text-[13px] font-semibold text-slate-900">
+          <p class="text-sm font-semibold text-slate-900">
             {{
               hasRatedThisTask ? "คะแนนที่คุณให้กับงานนี้" : "ให้คะแนนงานนี้"
             }}
           </p>
-          <p class="text-[10px] text-slate-500">
+          <p class="text-[11px] text-slate-500">
             {{
               hasRatedThisTask
                 ? "ดูรายละเอียดคะแนนที่เคยให้ไปแล้ว"
@@ -43,7 +43,7 @@
     <!-- legend 5–1 -->
     <div class="mb-3 rounded-2xl bg-slate-50 px-3 py-2">
       <div
-        class="flex flex-wrap justify-between gap-y-1 text-[9px] font-medium"
+        class="flex flex-wrap justify-between gap-y-1 text-[10px] font-medium"
       >
         <span class="text-emerald-600">5 พึงพอใจมากที่สุด</span>
         <span class="text-emerald-500">4 พึงพอใจมาก</span>
@@ -61,12 +61,12 @@
         class="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2"
       >
         <div class="mb-1 flex items-center justify-between">
-          <span class="text-[12px] font-medium text-slate-900">
+          <span class="text-[13px] font-medium text-slate-900">
             {{ index + 1 }}. {{ item.label }}
           </span>
           <span
             v-if="tempRatingScores[index]"
-            class="text-[10px] font-medium text-amber-600"
+            class="text-[11px] font-medium text-amber-600"
           >
             {{ tempRatingScores[index] }}/5
           </span>
@@ -100,7 +100,7 @@
       <template v-if="!hasRatedThisTask">
         <button
           type="button"
-          class="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-[12px] font-medium text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
+          class="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-[13px] font-medium text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
           :disabled="ratingLoading"
           @click=""
         >
@@ -108,7 +108,7 @@
         </button>
         <button
           type="button"
-          class="flex-1 rounded-full bg-amber-500 px-3 py-2 text-[12px] font-medium text-white shadow-sm disabled:bg-slate-300 disabled:cursor-not-allowed"
+          class="flex-1 rounded-full bg-amber-500 px-3 py-2 text-[13px] font-medium text-white shadow-sm disabled:bg-slate-300 disabled:cursor-not-allowed"
           :disabled="!canSubmitRating || ratingLoading"
           @click="submitRating"
         >
@@ -120,7 +120,7 @@
       <template v-else>
         <button
           type="button"
-          class="w-full rounded-full bg-emerald-500 px-3 py-2 text-[12px] font-medium text-white shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          class="w-full rounded-full bg-emerald-500 px-3 py-2 text-[13px] font-medium text-white shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
           :disabled="ratingLoading"
           @click="closeRatingModal"
         >

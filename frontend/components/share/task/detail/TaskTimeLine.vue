@@ -3,12 +3,12 @@
   <section class="rounded-2xl bg-white p-3.5 shadow-sm">
     <div class="mb-3 flex items-center justify-between">
       <div
-        class="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-900"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900"
       >
         <Clock class="h-4 w-4 text-emerald-600" />
         <span>ไทม์ไลน์การดำเนินการ</span>
       </div>
-      <span class="text-[11px] text-slate-400">
+      <span class="text-xs text-slate-400">
         ขั้นตอนที่ {{ currentStep }} / 5
       </span>
     </div>
@@ -47,19 +47,19 @@
         >
           <p
             v-if="step.step === currentStep"
-            class="mb-0.5 text-[11px] font-medium uppercase tracking-[0.18em] text-indigo-500"
+            class="mb-0.5 text-xs font-medium uppercase tracking-[0.18em] text-indigo-500"
           >
             ขั้นตอนปัจจุบัน
           </p>
 
           <!-- label จาก backend -->
-          <p class="text-[13px] font-semibold text-slate-900">
+          <p class="text-sm font-semibold text-slate-900">
             {{ step.label }}
           </p>
 
           <p
             v-if="stepDescription(step.step)"
-            class="mt-0.5 text-[11px] leading-snug text-slate-500 whitespace-pre-line"
+            class="mt-0.5 text-xs leading-snug text-slate-500 whitespace-pre-line"
           >
             {{ stepDescription(step.step) }}
           </p>

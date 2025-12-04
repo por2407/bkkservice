@@ -19,10 +19,10 @@
       </div>
 
       <div class="flex-1 text-left">
-        <p class="text-sm font-semibold text-slate-900">
+        <p class="text-[15px] font-semibold text-slate-900">
           ยืนยันการส่งงานแจ้งซ่อม
         </p>
-        <p class="text-[11px] text-slate-600">
+        <p class="text-xs text-slate-600">
           กรุณาตรวจสอบข้อมูลก่อนยืนยัน ระบบจะบันทึกข้อมูลตามรายละเอียดด้านล่าง
         </p>
       </div>
@@ -30,7 +30,7 @@
 
     <!-- SUMMARY DETAIL โทนเข้มบนพื้นเทาอ่อน -->
     <div
-      class="mb-4 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left text-[11px] text-slate-800"
+      class="mb-4 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left text-sm text-slate-800"
     >
       <p class="flex items-start gap-2">
         <DoorOpen class="mt-0.5 h-4 w-4 text-sky-500" />
@@ -81,7 +81,6 @@
       </p>
     </div>
 
-    <!-- ปุ่ม: ปุ่ม confirm สีเดิม, ตัวหนังสือเข้ม -->
     <div class="flex gap-2">
       <button
         type="button"

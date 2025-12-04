@@ -12,16 +12,16 @@
             />
           </div>
           <div>
-            <p class="text-[12px] font-semibold text-slate-900">ความพึงพอใจงานนี้</p>
-            <p v-if="hasRatedThisTask && averageRating" class="text-[11px] text-emerald-600">
+            <p class="text-[13px] font-semibold text-slate-900">ความพึงพอใจงานนี้</p>
+            <p v-if="hasRatedThisTask && averageRating" class="text-xs text-emerald-600">
               {{ averageRating ?? 0 }}/5 · 6 ข้อ
             </p>
-            <p v-else class="text-[11px] text-slate-400">ยังไม่มีการให้คะแนน</p>
+            <p v-else class="text-xs text-slate-400">ยังไม่มีการให้คะแนน</p>
           </div>
         </div>
         <button
           type="button"
-          class="rounded-full px-3 py-1.5 text-[11px] font-medium shadow-sm"
+          class="rounded-full px-3 py-1.5 text-xs font-medium shadow-sm"
           :class="hasRatedThisTask ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-500 text-white'"
           :disabled="loading"
           @click="$emit('click')"

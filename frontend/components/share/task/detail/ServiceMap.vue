@@ -1,6 +1,6 @@
 <template>
     <div class="mt-2 flex items-center justify-between">
-      <p class="text-[10px] text-slate-500">แตะเพื่อดูตำแหน่งของช่างบนแผนที่</p>
+      <p class="text-[11px] text-slate-500">แตะเพื่อดูตำแหน่งของช่างบนแผนที่</p>
       <button
         type="button"
         class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm active:scale-95"
@@ -29,10 +29,10 @@
                 <MapPin class="h-4 w-4 text-emerald-600" />
               </div>
               <div>
-                <p class="text-[13px] font-semibold text-slate-900">
+                <p class="text-sm font-semibold text-slate-900">
                   ตำแหน่งช่าง (เรียลไทม์)
                 </p>
-                <p class="text-[10px] text-slate-500">
+                <p class="text-[11px] text-slate-500">
                   {{ staffLocationTimeLabel }}
                 </p>
               </div>

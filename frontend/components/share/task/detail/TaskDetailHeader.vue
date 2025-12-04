@@ -3,7 +3,7 @@
     <div class="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
       <!-- แถวบน: อัปเดตล่าสุด -->
       <div
-        class="mb-1 flex items-center justify-between text-[11px] text-slate-500"
+        class="mb-1 flex items-center justify-between text-xs text-slate-500"
       >
         <div class="inline-flex items-center gap-1.5">
           <Clock class="h-3.5 w-3.5 text-slate-400" />
@@ -12,21 +12,21 @@
       </div>
 
       <!-- คำอธิบายงาน -->
-      <p class="text-[13px] font-semibold text-slate-900 leading-snug">
+      <p class="text-sm font-semibold text-slate-900 leading-snug">
         {{ task.description }}
       </p>
 
       <!-- แถวล่าง: ห้อง + สถานะ -->
       <div class="mt-2 flex items-center justify-between">
         <div
-          class="inline-flex items-center gap-1.5 text-[12px] text-slate-600"
+          class="inline-flex items-center gap-1.5 text-[13px] text-slate-600"
         >
           <MapPin class="h-3.5 w-3.5 text-sky-500" />
           <span>ห้อง {{ task.room }}</span>
         </div>
 
         <span
-          class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium"
+          class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
           :class="
             task.status === 'in_progress'
               ? 'bg-amber-50 text-amber-700'

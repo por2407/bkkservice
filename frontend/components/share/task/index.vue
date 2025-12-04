@@ -20,8 +20,8 @@
         >
           <Clock class="h-5 w-5" />
           <div>
-            <p class="text-[10px] opacity-90">กำลังดำเนินการ</p>
-            <p class="text-[15px] font-bold">{{ inProgressCount }}</p>
+            <p class="text-[11px] opacity-90">กำลังดำเนินการ</p>
+            <p class="text-base font-bold">{{ inProgressCount }}</p>
           </div>
         </button>
 
@@ -38,8 +38,8 @@
         >
           <CheckCircle2 class="h-5 w-5" />
           <div>
-            <p class="text-[10px] opacity-90">เสร็จแล้ว</p>
-            <p class="text-[15px] font-bold">{{ doneCount }}</p>
+            <p class="text-[11px] opacity-90">เสร็จแล้ว</p>
+            <p class="text-base font-bold">{{ doneCount }}</p>
           </div>
         </button>
 
@@ -57,8 +57,8 @@
         >
           <ClipboardList class="h-5 w-5" />
           <div>
-            <p class="text-[10px] opacity-90">งานทั้งหมด</p>
-            <p class="text-[15px] font-bold">{{ totalTasks }}</p>
+            <p class="text-[11px] opacity-90">งานทั้งหมด</p>
+            <p class="text-base font-bold">{{ totalTasks }}</p>
           </div>
         </button>
       </div>
@@ -89,7 +89,7 @@
               type="text"
               inputmode="search"
               placeholder="ค้นหาจากเลขที่งาน ห้อง หรือคำอธิบาย"
-              class="w-full rounded-2xl border border-emerald-100 bg-white/90 py-2 pl-9 pr-8 text-[13px] text-gray-800 shadow-sm outline-none ring-0 placeholder:text-gray-400 focus:border-emerald-400 focus:bg-white focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus:ring-2 focus:ring-emerald-200"
+              class="w-full rounded-2xl border border-emerald-100 bg-white/90 py-2 pl-9 pr-8 text-sm text-gray-800 shadow-sm outline-none ring-0 placeholder:text-gray-400 focus:border-emerald-400 focus:bg-white focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus:ring-2 focus:ring-emerald-200"
             />
 
             <!-- ปุ่มล้างข้อความ -->
@@ -120,7 +120,7 @@
     <div
       ref="infiniteScrollTrigger"
       v-show="!loading && canLoadMore && filteredTasks.length > 0"
-      class="h-10 w-full flex items-center justify-center text-[11px] text-gray-400"
+      class="h-10 w-full flex items-center justify-center text-xs text-gray-400"
     >
       เลื่อนลงเพื่อโหลดงานเพิ่ม...
     </div>
@@ -168,14 +168,13 @@
         alt="ไม่มีรายการงาน"
         class="mb-3 h-16 w-auto opacity-80"
       />
-      <p class="text-[12px]">ไม่พบงานในขณะนี้</p>
+      <p class="text-[13px]">ไม่พบงานในขณะนี้</p>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ClipboardList, Clock, CheckCircle2, Search, X } from "lucide-vue-next";
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { storeToRefs } from "pinia";
 import TasksHeader from "@/components/share/task/TasksHeader.vue";
 import TaskList from "@/components/share/task/TaskList.vue";

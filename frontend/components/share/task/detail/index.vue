@@ -18,13 +18,13 @@
           <ArrowLeft class="h-4 w-4 text-slate-700" />
         </button>
 
-        <span class="text-[15px] font-semibold text-slate-900">
+        <span class="text-base font-semibold text-slate-900">
           รายละเอียดงาน
         </span>
       </div>
 
       <!-- ชิปหมายเลขงาน -->
-      <span class="px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
+      <span class="px-2.5 py-0.5 text-xs font-medium text-slate-600">
         {{ task.id }}
       </span>
     </div>
@@ -73,15 +73,15 @@
               class="w-5 h-5 shrink-0"
             />
             <div class="flex flex-col">
-              <span class="text-[11px] text-emerald-100">สถานะงาน</span>
-              <span class="text-[13px] font-semibold text-white leading-snug">
+              <span class="text-xs text-emerald-100">สถานะงาน</span>
+              <span class="text-sm font-semibold text-white leading-snug">
                 รอรับเรื่องแจ้งงาน เพื่อดำเนินงาน
               </span>
             </div>
           </div>
 
           <span
-            class="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-[11px] font-medium text-white"
+            class="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white"
           >
             กำลังจะเริ่มงาน
           </span>
@@ -94,13 +94,28 @@
         :currentStep="task.currentStep ?? 0"
         :timeline="task.timeline ?? []"
       />
-      
     </main>
     <ResponsiveModal
       :model-value="previewOpen"
       @update:model-value="previewOpen = false"
     >
       <MediaPreview :previewMedia="previewMedia" @close="previewOpen = false" />
+    </ResponsiveModal>
+
+    <ResponsiveModal
+      :model-value="showConfirm"
+      @update:model-value="showConfirm = false"
+    >
+      <ConfirmStatusUpdateModal
+        :job-no="task.id"
+        :room="task.room"
+        :status-label="previewSubmit.nextStatusLabel"
+        :assignee="previewSubmit.assignee"
+        :updated-at="previewSubmit.currentTimeText"
+        :isStatus="previewSubmit.isStatus"
+        @cancel="showConfirm = false"
+        @confirm="showConfirm = false"
+      />
     </ResponsiveModal>
   </div>
 </template>
@@ -128,6 +143,7 @@ import { useStickyHeader } from "@/composables/useStickyHeader";
 import { useRatingFlow } from "@/composables/task/customer/rating/useRatingFlow";
 import MediaPreview from "./MediaPreview.vue";
 import ResponsiveModal from "../../../share/ResponsiveModal.vue";
+import ConfirmStatusUpdateModal from "../../../employee/task/ConfirmStatusUpdateModal.vue";
 
 const props = defineProps<{ task: TaskDetail | null }>();
 
@@ -156,6 +172,21 @@ const authStore = useAuthStore();
 const { isMobile } = storeToRefs(authStore);
 
 const { headerRef, showStickyHeader } = useStickyHeader(isMobile);
+
+const showConfirm = ref(false);
+const form = reactive({
+  userCode: "",
+  jobNo: "",
+  typeCode: "",
+  typeSeq: "",
+});
+const previewSubmit = reactive({
+  assignee: "",
+  nextStatusLabel: "",
+  currentTimeText: "",
+
+  isStatus: false,
+});
 
 const previewOpen = ref(false);
 const previewMedia = ref<PreviewMedia | null>(null);
@@ -202,18 +233,28 @@ const handleSummaryCardClick = () => {
   const currentSubmitJob = props.task.timeline?.find(
     (t) => t.step === props.task?.currentStep
   );
-  const payload = {
-    userCode: "00005",
+
+  Object.assign(form, {
     jobNo: props.task.id,
     typeCode: currentSubmitJob?.code,
     typeSeq: currentSubmitJob?.step,
-  };
-  console.log(payload);
+  });
 
-  if (isFinalStep.value) {
-    console.log("ดูสรุปงานของ", props.task.id);
-  } else {
-    console.log("อัปเดตสถานะงาน", props.task.id);
-  }
+  console.log(JSON.stringify(form, null, 2));
+
+  previewSubmit.assignee = authStore.user?.name ?? "";
+  previewSubmit.nextStatusLabel = currentSubmitJob?.label ?? "";
+  previewSubmit.currentTimeText = new Date().toLocaleString("th-TH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  previewSubmit.isStatus = !!isFinalStep.value;
+
+  showConfirm.value = true;
 };
 </script>

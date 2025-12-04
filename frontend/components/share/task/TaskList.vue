@@ -13,39 +13,39 @@
         <div class="flex flex-col gap-1">
           <p
             v-if="task.schoolName"
-            class="text-[11px] font-semibold text-sky-700"
+            class="text-xs font-semibold text-sky-700"
           >
             {{ task.schoolName }}
           </p>
 
           <div class="flex items-baseline justify-between gap-2">
             <div class="flex items-baseline gap-1.5">
-              <p class="text-[13px] font-semibold text-gray-900">
+              <p class="text-sm font-semibold text-gray-900">
                 หมายเลข {{ task.ticket }}
               </p>
               <span
                 v-if="task.isMine && isCustomer"
-                class="rounded-full border border-emerald-100 bg-emerald-50 px-1.5 py-[1px] text-[10px] font-medium text-emerald-700"
+                class="rounded-full border border-emerald-100 bg-emerald-50 px-1.5 py-[1px] text-[11px] font-medium text-emerald-700"
               >
                 ของฉัน
               </span>
             </div>
 
             <!-- ขวา: เวลาอัปเดต เหมือนเดิม -->
-            <p class="text-[11px] text-gray-400">
+            <p class="text-xs text-gray-400">
               {{ formatUpdatedAt(task.updatedAt) }}
             </p>
           </div>
           <div
             v-if="task.room"
-            class="inline-flex items-center gap-1 text-[11px] text-gray-600"
+            class="inline-flex items-center gap-1 text-xs text-gray-600"
           >
             <MapPin class="h-3.5 w-3.5" />
             <span>ห้อง {{ task.room }}</span>
           </div>
           <div class="mt-0.5 flex flex-wrap gap-x-3 gap-y-1.5">
             <div
-              class="inline-flex items-center gap-1.5 text-[11px] text-gray-600"
+              class="inline-flex items-center gap-1.5 text-xs text-gray-600"
             >
               <CheckCircle2
                 v-if="task.status === 'done'"
@@ -57,7 +57,7 @@
 
               <span
                 v-if="task.status === 'in_progress' && task.currentStep"
-                class="inline-flex items-center justify-center h-3.5 px-1.5 rounded-full bg-emerald-500 text-[9px] font-semibold text-white"
+                class="inline-flex items-center justify-center h-3.5 px-1.5 rounded-full bg-emerald-500 text-[10px] font-semibold text-white"
               >
                 {{ task.currentStep }}/5
               </span>
@@ -66,7 +66,7 @@
             <!-- attachments -->
             <div
               v-if="task.hasImage || task.hasVideo"
-              class="inline-flex items-center gap-1 text-[11px] text-sky-600"
+              class="inline-flex items-center gap-1 text-xs text-sky-600"
             >
               <ImageIcon v-if="task.hasImage" class="h-3.5 w-3.5" />
               <Video v-if="task.hasVideo" class="h-3.5 w-3.5" />
@@ -74,7 +74,7 @@
 
             <div
               v-if="(task.commentsCount ?? 0) > 0"
-              class="inline-flex items-center gap-1 text-[11px] text-purple-600"
+              class="inline-flex items-center gap-1 text-xs text-purple-600"
             >
               <MessageCircle class="h-3.5 w-3.5" />
               <span>{{ task.commentsCount }}</span>
@@ -83,7 +83,7 @@
             <!-- ⭐ rating -->
             <div
               v-if="task.canRate"
-              class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px]"
+              class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]"
               :class="
                 task.rating
                   ? 'bg-amber-50 text-amber-700'
@@ -103,20 +103,20 @@
             </div>
           </div>
 
-          <p class="mt-1 text-[12px] leading-snug text-gray-600">
+          <p class="mt-1 text-[13px] leading-snug text-gray-600">
             {{ task.description }}
           </p>
 
           <p
             v-if="task.dueDate"
-            class="mt-1 text-[11px] font-semibold text-red-500"
+            class="mt-1 text-xs font-semibold text-red-500"
           >
             กำหนดแล้วเสร็จ: {{ formatDueDate(task.dueDate) }}
           </p>
 
           <p
             v-if="isDealer"
-            class="text-[11px] font-semibold"
+            class="text-xs font-semibold"
             :class="getDealerStatusDisplay(task).colorClass"
           >
             {{ getDealerStatusDisplay(task).text }}
@@ -138,7 +138,7 @@
           alt="ไม่มีรายการงาน"
           class="mb-3 h-16 w-auto opacity-80"
         />
-        <p class="text-[12px]">ไม่พบงานในขณะนี้</p>
+        <p class="text-[13px]">ไม่พบงานในขณะนี้</p>
       </div>
     </div>
   </section>

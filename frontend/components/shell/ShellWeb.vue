@@ -383,21 +383,21 @@
             <!-- Nav (MOBILE) -->
             <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
               <NuxtLink
-                v-for="item in sidebarMenu"
+                v-for="(item, index) in sidebarMenu"
                 :key="item.to + '-mobile'"
                 :to="item.to"
                 class="group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
                 :class="
-                  isActive(item.to)
+                  nav.activeIndex === index
                     ? 'bg-blue-400 text-white ring-1 ring-blue-200 shadow-sm'
                     : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 ring-1 ring-transparent hover:ring-slate-200'
                 "
-                @click="sidebarOpen = false"
+                @click="handleNavClick(index, item)"
               >
                 <span
                   class="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full transition-colors"
                   :class="
-                    isActive(item.to)
+                    nav.activeIndex === index
                       ? 'bg-white/80'
                       : 'bg-transparent group-hover:bg-slate-300'
                   "
@@ -406,7 +406,7 @@
                   :is="item.icon"
                   class="w-5 h-5 shrink-0 transition-colors"
                   :class="
-                    isActive(item.to)
+                    nav.activeIndex === index
                       ? 'text-white'
                       : 'text-slate-400 group-hover:text-slate-700'
                   "
@@ -513,10 +513,10 @@ const handleNavClick = async (index: number, item: menu) => {
     }
     return;
   }
-  
+
   if (index !== 0 && taskFilterStore.activeFilter !== "in_progress")
     taskFilterStore.setActiveFilter("in_progress");
-  
+
   const isSameRoute = nav.activeIndex === index && route.path === item.to;
 
   if (isSameRoute) {

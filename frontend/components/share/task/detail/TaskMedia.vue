@@ -3,12 +3,12 @@
   <section class="rounded-2xl bg-white p-3.5 shadow-sm">
     <div class="mb-2 flex items-center justify-between">
       <div
-        class="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-900"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-slate-900"
       >
         <ImageIcon class="h-4 w-4 text-sky-500" />
         <span>สื่อหน้างาน</span>
       </div>
-      <span class="text-[11px] text-slate-400">
+      <span class="text-xs text-slate-400">
         {{ media.length }} รายการ
       </span>
     </div>
@@ -41,7 +41,7 @@
 
         <!-- badge ประเภทสื่อ -->
         <span
-          class="absolute bottom-1 right-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white"
+          class="absolute bottom-1 right-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[11px] font-medium text-white"
         >
           {{ item.type === "image" ? "รูปภาพ" : "วิดีโอ" }}
         </span>
