@@ -83,7 +83,7 @@ async function taskStatuses(ctx) {
           : {}),
         currentStep: row.SSMT_TYPE_SEQ
           ? Math.min(Number(row.SSMT_TYPE_SEQ) + 1, 5)
-          : 0,
+          : 1,
       };
       tasks.push(data);
     }
@@ -104,6 +104,7 @@ async function taskDetail({ tarNo, userType }) {
       const timeline = [];
       for (const tl of timelineRows) {
         timeline.push({
+          code: tl.SSMT_TYPE_CODE,
           step: tl.SSMT_TYPE_SEQ,
           label: tl.SSSR_DESC,
           ...(tl.SSMT_STATUS === "Y"
@@ -178,6 +179,7 @@ async function taskTimeLine({ tarNo, userType }) {
     });
     for (const tl of timelineRows) {
       timeline.push({
+        code: tl.SSMT_TYPE_CODE,
         step: tl.SSMT_TYPE_SEQ,
         label: tl.SSSR_DESC,
         ...(tl.SSMT_STATUS === "Y"

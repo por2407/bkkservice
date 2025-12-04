@@ -2,6 +2,7 @@
   <div
     v-if="isMobile"
     class="relative w-full mx-auto bg-white shadow-xl flex flex-col overflow-hidden"
+    :style="{ height: 'var(--app-height)', minHeight: 'var(--app-height)' }"
   >
     <main
       class="flex-1 min-h-0 overflow-y-auto px-3 pt-3 pb-3 sm:px-4 sm:pt-4"

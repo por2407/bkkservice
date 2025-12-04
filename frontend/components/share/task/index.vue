@@ -10,11 +10,10 @@
         <!-- in_progress -->
         <button
           type="button"
-          @click="selectedFilter = 'in_progress'"
-          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur
-                 transition active:scale-[0.98] border-2 border-white/70"
+          @click="taksFilter.setActiveFilter('in_progress')"
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
           :class="
-            selectedFilter === 'in_progress'
+            taksFilter.activeFilter === 'in_progress'
               ? filterStyles.in_progress
               : 'bg-white/10 text-emerald-50/90 opacity-80'
           "
@@ -29,11 +28,10 @@
         <!-- done -->
         <button
           type="button"
-          @click="selectedFilter = 'done'"
-          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur
-                 transition active:scale-[0.98] border-2 border-white/70"
+          @click="taksFilter.setActiveFilter('done')"
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
           :class="
-            selectedFilter === 'done'
+            taksFilter.activeFilter === 'done'
               ? filterStyles.done
               : 'bg-white/10 text-emerald-50/90 opacity-80'
           "
@@ -49,11 +47,10 @@
         <button
           v-if="!isEmployee"
           type="button"
-          @click="selectedFilter = 'all'"
-          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur
-                 transition active:scale-[0.98] border-2 border-white/70"
+          @click="taksFilter.setActiveFilter('all')"
+          class="w-1/3 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70"
           :class="
-            selectedFilter === 'all'
+            taksFilter.activeFilter === 'all'
               ? filterStyles.all
               : 'bg-white/10 text-emerald-50/90 opacity-80'
           "
@@ -74,7 +71,7 @@
           isMobile ? '-mx-3' : '-mx-4',
           showStickyHeader
             ? 'bg-slate-50/90 backdrop-blur supports-[backdrop-filter]:bg-slate-50/70 border-b border-slate-200/70 shadow-sm rounded-b-2xl'
-            : ''
+            : '',
         ]"
       >
         <div :class="['pt-2 pb-2', isMobile ? 'px-3' : 'px-4']">
@@ -92,12 +89,7 @@
               type="text"
               inputmode="search"
               placeholder="ค้นหาจากเลขที่งาน ห้อง หรือคำอธิบาย"
-              class="w-full rounded-2xl border border-emerald-100 bg-white/90
-                     py-2 pl-9 pr-8 text-[13px] text-gray-800 shadow-sm outline-none ring-0
-                     placeholder:text-gray-400
-                     focus:border-emerald-400 focus:bg-white
-                     focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)]
-                     focus:ring-2 focus:ring-emerald-200"
+              class="w-full rounded-2xl border border-emerald-100 bg-white/90 py-2 pl-9 pr-8 text-[13px] text-gray-800 shadow-sm outline-none ring-0 placeholder:text-gray-400 focus:border-emerald-400 focus:bg-white focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus:ring-2 focus:ring-emerald-200"
             />
 
             <!-- ปุ่มล้างข้อความ -->
@@ -182,27 +174,18 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ClipboardList,
-  Clock,
-  CheckCircle2,
-  Search,
-  X,
-} from "lucide-vue-next";
-import {
-  ref,
-  onMounted,
-  onBeforeUnmount,
-  computed,
-} from "vue";
+import { ClipboardList, Clock, CheckCircle2, Search, X } from "lucide-vue-next";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { storeToRefs } from "pinia";
 import TasksHeader from "@/components/share/task/TasksHeader.vue";
 import TaskList from "@/components/share/task/TaskList.vue";
 import { useTaskList } from "@/composables/task/useTaskList";
 import { useAuthStore } from "@/stores/auth.stores";
 import { useStickyHeader } from "@/composables/useStickyHeader";
+import { useTaskFilterStore } from "~/stores/TaskFilter.stores";
 
 const authStore = useAuthStore();
+const taksFilter = useTaskFilterStore();
 const { isMobile } = storeToRefs(authStore);
 
 const { headerRef, showStickyHeader } = useStickyHeader(isMobile);
@@ -223,7 +206,7 @@ const {
   loading,
   canLoadMore,
   loadMore,
-} = useTaskList();
+} = useTaskList(toRef(taksFilter, "activeFilter"));
 
 // ref สำหรับ sentinel element
 const infiniteScrollTrigger = ref<HTMLElement | null>(null);

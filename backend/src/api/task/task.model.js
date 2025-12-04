@@ -258,16 +258,16 @@ async function findDetail({ conn, tarNo, type }) {
         WHEN s.STT_STATUS = 'Y' THEN 'done'
     END AS STATUS `
     : ` CASE
-        WHEN m.SSMT_STATUS = 'Y' AND m.SSMT_TYPE_SEQ = '5' THEN 'done'
+        WHEN m.SSMT_STATUS = 'Y' THEN 'done'
         WHEN m.SSMT_STATUS IS NULL THEN 'in_progress'
     END AS STATUS,
     t.BTDST_SUBMIT_DATE  `;
 
   const joins = !type
-    ? ` join SV_SERVICEM_T m  ON m.SSMT_JOB_NO = s.STT_JOBNO 
+    ? ` join SV_SERVICEM_T m  ON m.SSMT_JOB_NO = s.STT_JOBNO  and m.SSMT_TYPE_SEQ = '5' 
         join BK_TARDS_T t on t.BTDST_NO = s.STT_JOBNO`
     : ``;
-
+    
   return conn.execute(
     `select s.STT_JOBNO, s.STT_TAR_NO, s.STT_ROOM_NO, s.STT_DET, s.STT_IMAGE, s.STT_STATUS, s.STT_DATE, ${cols} from SV_TARM_T s ${joins} where s.STT_TAR_NO =:tarNo`,
     { tarNo }

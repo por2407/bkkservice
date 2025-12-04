@@ -1,9 +1,9 @@
 <template>
-  <div class="relative w-full rounded-t-3xl bg-white p-5 pb-5 shadow-lg">
+  <div class="relative w-full rounded-t-3xl bg-white px-5 pt-4 pb-5 shadow-lg">
     <!-- overlay ตอนกำลังบันทึก + วงกลมเปอร์เซ็น -->
     <div
       v-if="saving"
-      class="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-white/90"
+      class="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-3xl bg-white/90"
     >
       <div class="progress-ring" :style="{ '--value': saveProgress + '%' }">
         <span class="progress-ring__label">{{ saveProgress }}%</span>
@@ -11,57 +11,81 @@
       <p class="mt-2 text-xs text-slate-600">กำลังบันทึกงาน...</p>
     </div>
 
-    <div
-      class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-amber-50"
-    >
-      <AlertTriangle class="h-6 w-6 text-amber-600" />
-    </div>
-
-    <p class="mb-1 text-base font-semibold text-slate-900">
-      ยืนยันการส่งงานแจ้งซ่อม
-    </p>
-    <p class="mb-3 text-[11px] text-slate-600">
-      กรุณาตรวจสอบข้อมูลก่อนยืนยัน ระบบจะบันทึกข้อมูลตามรายละเอียดด้านล่าง
-    </p>
-
-    <!-- summary detail -->
-    <div
-      class="mb-4 space-y-1.5 rounded-2xl bg-slate-50 px-3 py-2 text-left text-[11px] text-slate-700"
-    >
-      <div class="flex justify-between gap-2">
-        <span class="text-slate-500">หมายเลขห้อง</span>
-        <span class="font-semibold">{{ form.room || "-" }}</span>
+    <div class="mb-4 mt-3 flex items-center gap-3">
+      <div
+        class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50"
+      >
+        <ClipboardCheck class="h-5 w-5 text-emerald-500" />
       </div>
-      <div class="flex justify-between gap-2">
-        <span class="text-slate-500">หมายเลขเครื่อง</span>
-        <span class="max-w-[150px] truncate text-right">
-          {{ form.machineNo || "-" }}
-        </span>
-      </div>
-      <div class="flex flex-col gap-1">
-        <span class="text-slate-500">รายละเอียดงาน</span>
-        <p
-          class="max-h-24 overflow-y-auto rounded-xl bg-white px-2 py-1 text-[11px] leading-snug"
-        >
-          {{ form.description || "-" }}
+
+      <div class="flex-1 text-left">
+        <p class="text-sm font-semibold text-slate-900">
+          ยืนยันการส่งงานแจ้งซ่อม
+        </p>
+        <p class="text-[11px] text-slate-600">
+          กรุณาตรวจสอบข้อมูลก่อนยืนยัน ระบบจะบันทึกข้อมูลตามรายละเอียดด้านล่าง
         </p>
       </div>
-      <div class="flex justify-between gap-2">
-        <span class="text-slate-500">ไฟล์แนบ</span>
-        <span class="text-right">
-          {{
-            uploads.length
-              ? `${uploads.length} ไฟล์ · รูป ${imageCount} · วิดีโอ ${videoCount}`
-              : "ไม่มีไฟล์แนบ"
-          }}
-        </span>
-      </div>
     </div>
 
+    <!-- SUMMARY DETAIL โทนเข้มบนพื้นเทาอ่อน -->
+    <div
+      class="mb-4 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-left text-[11px] text-slate-800"
+    >
+      <p class="flex items-start gap-2">
+        <DoorOpen class="mt-0.5 h-4 w-4 text-sky-500" />
+        <span class="flex-1">
+          <span class="text-slate-500">หมายเลขห้อง</span>
+          <span class="ml-1 font-semibold text-slate-900">
+            {{ form.room || "-" }}
+          </span>
+        </span>
+      </p>
+
+      <p class="flex items-start gap-2">
+        <Hash class="mt-0.5 h-4 w-4 text-sky-500" />
+        <span class="flex-1">
+          <span class="text-slate-500">หมายเลขเครื่อง</span>
+          <span
+            class="ml-1 max-w-[150px] truncate text-right font-semibold text-slate-900"
+          >
+            {{ form.machineNo || "-" }}
+          </span>
+        </span>
+      </p>
+
+      <div class="flex items-start gap-2">
+        <FileText class="mt-0.5 h-4 w-4 text-sky-500" />
+        <div class="flex-1">
+          <span class="text-slate-500">รายละเอียดงาน</span>
+          <p
+            class="mt-1 max-h-24 overflow-y-auto rounded-xl bg-white px-2 py-1 text-[11px] leading-snug text-slate-900"
+          >
+            {{ form.description || "-" }}
+          </p>
+        </div>
+      </div>
+
+      <p class="flex items-start gap-2">
+        <Paperclip class="mt-0.5 h-4 w-4 text-sky-500" />
+        <span class="flex-1">
+          <span class="text-slate-500">ไฟล์แนบ</span>
+          <span class="ml-1 text-slate-900">
+            {{
+              uploads.length
+                ? `${uploads.length} ไฟล์ · รูป ${imageCount} · วิดีโอ ${videoCount}`
+                : "ไม่มีไฟล์แนบ"
+            }}
+          </span>
+        </span>
+      </p>
+    </div>
+
+    <!-- ปุ่ม: ปุ่ม confirm สีเดิม, ตัวหนังสือเข้ม -->
     <div class="flex gap-2">
       <button
         type="button"
-        class="min-h-[44px] flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+        class="min-h-[44px] flex-1 rounded-full border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
         :disabled="saving"
         @click="emit('close')"
       >
@@ -69,18 +93,26 @@
       </button>
       <button
         type="button"
-        class="min-h-[44px] flex-1 rounded-full bg-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300"
+        class="min-h-[44px] flex-1 rounded-full bg-emerald-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-600 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 flex items-center justify-center gap-1.5"
         :disabled="saving"
         @click="emit('confirm')"
       >
-        {{ saving ? "กำลังบันทึก..." : "ยืนยันส่งงาน" }}
+        <Save class="h-4 w-4" />
+        <span>{{ saving ? "กำลังบันทึก..." : "ยืนยันส่งงาน" }}</span>
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { AlertTriangle } from "lucide-vue-next";
+import {
+  ClipboardCheck,
+  DoorOpen,
+  Hash,
+  FileText,
+  Paperclip,
+  Save,
+} from "lucide-vue-next";
 import type { UploadItem } from "@/composables/task/customer/useNewJob";
 
 defineProps<{
@@ -103,10 +135,10 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
-/* วงกลม progress ขึ้นตามเปอร์เซ็นจาก axios */
+/* วงกลม progress: ใช้สีส้มเดิม */
 .progress-ring {
   --size: 56px;
-  --thickness: 4px;
+  --thickness: 2px;
   --value: 0%;
 
   position: relative;

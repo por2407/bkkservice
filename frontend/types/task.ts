@@ -43,6 +43,7 @@ export interface TaskMedia {
 }
 
 export interface StepRuntimeInfo {
+  code?:string;
   step: number;
   label: string;
   finishedAt?: string;

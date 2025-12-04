@@ -450,10 +450,12 @@ import {
 import { useSidebarMenu } from "@/composables/sidebar/sidebarItem";
 import { useNavStore } from "@/stores/nav.stores";
 import type { menu } from "@/types/sidebar";
+import { useTaskFilterStore } from "@/stores/TaskFilter.stores";
 
 const route = useRoute();
 const { sidebarMenu } = useSidebarMenu();
 const nav = useNavStore();
+const taskFilterStore = useTaskFilterStore();
 
 const sidebarOpen = ref(false);
 const userMenuOpen = ref(false);
@@ -511,7 +513,10 @@ const handleNavClick = async (index: number, item: menu) => {
     }
     return;
   }
-
+  
+  if (index !== 0 && taskFilterStore.activeFilter !== "in_progress")
+    taskFilterStore.setActiveFilter("in_progress");
+  
   const isSameRoute = nav.activeIndex === index && route.path === item.to;
 
   if (isSameRoute) {

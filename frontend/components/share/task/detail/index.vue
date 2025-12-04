@@ -94,6 +94,7 @@
         :currentStep="task.currentStep ?? 0"
         :timeline="task.timeline ?? []"
       />
+      
     </main>
     <ResponsiveModal
       :model-value="previewOpen"
@@ -197,6 +198,17 @@ const summaryCardDescription = computed(() => {
 
 const handleSummaryCardClick = () => {
   if (!props.task) return;
+
+  const currentSubmitJob = props.task.timeline?.find(
+    (t) => t.step === props.task?.currentStep
+  );
+  const payload = {
+    userCode: "00005",
+    jobNo: props.task.id,
+    typeCode: currentSubmitJob?.code,
+    typeSeq: currentSubmitJob?.step,
+  };
+  console.log(payload);
 
   if (isFinalStep.value) {
     console.log("ดูสรุปงานของ", props.task.id);

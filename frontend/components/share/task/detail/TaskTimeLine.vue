@@ -69,7 +69,7 @@
             v-if="
               step.key === 'on_the_way' &&
               status === 'in_progress' &&
-              currentStep >= 3
+              currentStep > 3
             "
           />
         </div>

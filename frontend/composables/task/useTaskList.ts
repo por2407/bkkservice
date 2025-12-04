@@ -11,13 +11,14 @@ export const filterStyles: Record<FilterKey, string> = {
 
 const VISIBLE_BATCH_SIZE = 50; // แสดงทีละกี่รายการ
 
-export function useTaskList() {
-  const selectedFilter = ref<FilterKey>("in_progress");
+export function useTaskList(activeFilter: Ref<FilterKey>) {
   const searchQuery = ref("");
   const debouncedSearch = ref("");
   const visibleLimit = ref(VISIBLE_BATCH_SIZE);
 
   let searchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const selectedFilter = computed(() => activeFilter.value ?? "in_progress");
 
   // ดึง list (SSR + cache + refresh ได้)
   const {
@@ -25,11 +26,9 @@ export function useTaskList() {
     pending: loading,
     error,
     refresh,
-  } = useAsyncData<Task[]>(
-    "task-list",
-    () => taskApi.getList(),
-    { default: () => [] }
-  );
+  } = useAsyncData<Task[]>("task-list", () => taskApi.getList(), {
+    default: () => [],
+  });
 
   // debounce search (ลดการคำนวณทุก key)
   watch(
@@ -98,9 +97,7 @@ export function useTaskList() {
 
   // count ต่าง ๆ ใช้จาก groupedTasks (ไม่ filter ซ้ำ)
   const totalTasks = computed(() => groupedTasks.value.all.length);
-  const inProgressCount = computed(
-    () => groupedTasks.value.in_progress.length
-  );
+  const inProgressCount = computed(() => groupedTasks.value.in_progress.length);
   const doneCount = computed(() => groupedTasks.value.done.length);
 
   const pageBgClass = computed(() => {

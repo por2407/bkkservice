@@ -6,8 +6,7 @@
     <!-- Content -->
     <main
       ref="scrollContainer"
-      class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-none
-             px-3 pt-3 pb-3 sm:px-4 sm:pt-4"
+      class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-none px-3 pt-3 pb-3 sm:px-4 sm:pt-4"
       style="padding-bottom: calc(84px + env(safe-area-inset-bottom))"
     >
       <slot />
@@ -16,8 +15,7 @@
     <!-- Bottom nav (อยู่ในกรอบ ไม่ใช้ fixed) -->
     <nav class="absolute bottom-0 left-0 w-full">
       <div
-        class="w-full bg-emerald-500 border-t border-emerald-600/60 shadow-[0_-10px_30px_rgba(6,95,70,0.28)]
-               rounded-t-3xl px-3 pt-2 pb-3 text-emerald-50"
+        class="w-full bg-emerald-500 border-t border-emerald-600/60 shadow-[0_-10px_30px_rgba(6,95,70,0.28)] rounded-t-3xl px-3 pt-2 pb-3 text-emerald-50"
         style="padding-bottom: calc(12px + env(safe-area-inset-bottom))"
       >
         <ul class="flex items-stretch justify-between">
@@ -31,10 +29,7 @@
               v-if="!item.external"
               :to="item.to"
               @click="handleNavClick(index, item)"
-              class="relative isolate group flex flex-col items-center justify-center
-                     py-3 text-[11px] font-medium gap-1.5 w-full
-                     transition-all duration-200 ease-out
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-xl"
+              class="relative isolate group flex flex-col items-center justify-center py-3 text-[11px] font-medium gap-1.5 w-full transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-xl"
             >
               <!-- active pill background -->
               <span
@@ -47,11 +42,12 @@
               />
 
               <!-- icon -->
-              <div class="relative z-10 inline-flex items-center justify-center">
+              <div
+                class="relative z-10 inline-flex items-center justify-center"
+              >
                 <component
                   :is="item.icon"
-                  class="w-5 h-5 transition-all duration-200 will-change-transform
-                         filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]"
+                  class="w-5 h-5 transition-all duration-200 will-change-transform filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]"
                   :class="
                     nav.activeIndex === index
                       ? 'text-white scale-110 translate-y-[-1px]'
@@ -70,9 +66,7 @@
                 <!-- badge -->
                 <span
                   v-if="item.badge"
-                  class="absolute -top-2.5 -right-3 min-w-[16px] h-[16px] px-1 rounded-full
-                         bg-rose-500 text-[9px] leading-[13px] text-white flex items-center justify-center
-                         shadow ring-[1.5px] ring-white/90"
+                  class="absolute -top-2.5 -right-3 min-w-[16px] h-[16px] px-1 rounded-full bg-rose-500 text-[9px] leading-[13px] text-white flex items-center justify-center shadow ring-[1.5px] ring-white/90"
                 >
                   {{ item.badge }}
                 </span>
@@ -80,8 +74,7 @@
 
               <!-- label -->
               <span
-                class="relative z-10 mt-0.5 max-w-[80px] text-center leading-snug whitespace-normal
-                       break-words transition-colors duration-200 min-h-[28px]"
+                class="relative z-10 mt-0.5 max-w-[80px] text-center leading-snug whitespace-normal break-words transition-colors duration-200 min-h-[28px]"
                 :class="
                   nav.activeIndex === index
                     ? 'text-white font-semibold'
@@ -97,10 +90,7 @@
               v-else
               type="button"
               @click="handleNavClick(index, item)"
-              class="relative isolate group flex flex-col items-center justify-center
-                     py-3 text-[11px] font-medium gap-1.5 w-full
-                     transition-all duration-200 ease-out
-                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-xl"
+              class="relative isolate group flex flex-col items-center justify-center py-3 text-[11px] font-medium gap-1.5 w-full transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-xl"
             >
               <span
                 class="absolute inset-x-1 inset-y-1 rounded-xl transition-all duration-200 z-0 pointer-events-none"
@@ -111,11 +101,12 @@
                 "
               />
 
-              <div class="relative z-10 inline-flex items-center justify-center">
+              <div
+                class="relative z-10 inline-flex items-center justify-center"
+              >
                 <component
                   :is="item.icon"
-                  class="w-5 h-5 transition-all duration-200 will-change-transform
-                         filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]"
+                  class="w-5 h-5 transition-all duration-200 will-change-transform filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]"
                   :class="
                     nav.activeIndex === index
                       ? 'text-white scale-110 translate-y-[-1px]'
@@ -132,17 +123,14 @@
                 />
                 <span
                   v-if="item.badge"
-                  class="absolute -top-2.5 -right-3 min-w-[16px] h-[16px] px-1 rounded-full
-                         bg-rose-500 text-[9px] leading-[13px] text-white flex items-center justify-center
-                         shadow ring-[1.5px] ring-white/90"
+                  class="absolute -top-2.5 -right-3 min-w-[16px] h-[16px] px-1 rounded-full bg-rose-500 text-[9px] leading-[13px] text-white flex items-center justify-center shadow ring-[1.5px] ring-white/90"
                 >
                   {{ item.badge }}
                 </span>
               </div>
 
               <span
-                class="relative z-10 mt-0.5 max-w-[80px] text-center leading-snug whitespace-normal
-                       break-words transition-colors duration-200 min-h-[28px]"
+                class="relative z-10 mt-0.5 max-w-[80px] text-center leading-snug whitespace-normal break-words transition-colors duration-200 min-h-[28px]"
                 :class="
                   nav.activeIndex === index
                     ? 'text-white font-semibold'
@@ -166,10 +154,12 @@ import { useSidebarMenu } from "@/composables/sidebar/sidebarItem";
 import { useNavStore } from "@/stores/nav.stores";
 import type { menu } from "@/types/sidebar";
 import { refreshNuxtData } from "#app";
+import { useTaskFilterStore } from "@/stores/TaskFilter.stores";
 
 const route = useRoute();
 const { sidebarMenu } = useSidebarMenu();
 const nav = useNavStore();
+const taskFilterStore = useTaskFilterStore();
 
 // scroll container จริง
 const scrollContainer = ref<HTMLElement | null>(null);
@@ -221,6 +211,8 @@ const handleNavClick = async (index: number, item: menu) => {
     if (import.meta.client) window.open(item.to, "_self");
     return;
   }
+  if (index !== 0 && taskFilterStore.activeFilter !== "in_progress")
+    taskFilterStore.setActiveFilter("in_progress");
 
   const isSameRoute = nav.activeIndex === index && route.path === item.to;
 

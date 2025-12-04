@@ -17,8 +17,21 @@ const thaiMonthsShort = [
     const date = new Date(isoString);
     const now = new Date();
   
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    // ตัดเวลาออกให้เหลือแค่วันที่ (ใช้ UTC เพื่อตัดปัญหา timezone)
+    const startOfToday = Date.UTC(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const startOfDate = Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+  
+    const diffDays = Math.floor(
+      (startOfToday - startOfDate) / (1000 * 60 * 60 * 24)
+    );
   
     const hours = date.getHours().toString().padStart(2, "0");
     const minutes = date.getMinutes().toString().padStart(2, "0");
