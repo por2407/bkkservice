@@ -28,15 +28,14 @@ export function useAuth() {
           userType: "e",
           name: "ชัชวาลย์",
         };
-      } else if(user === 'dealer' && pass === 'dealer'){
+      } else if (user === "dealer" && pass === "dealer") {
         data = {
           userCode: "2",
           appType: "a",
           userType: "d",
           name: "เพชร",
         };
-      }
-      else {
+      } else {
         throw new Error("Invalid username or password");
       }
       authStore.setUser(data);

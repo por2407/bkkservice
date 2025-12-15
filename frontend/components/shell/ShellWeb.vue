@@ -1,29 +1,20 @@
 <template>
-  <div
-    class="h-screen bg-gradient-to-b from-slate-50 to-slate-100 text-slate-900 flex overflow-hidden"
-  >
+  <div class="h-screen bg-[var(--bg-surface)] text-[var(--text-primary)] flex overflow-hidden">
     <!-- Sidebar (desktop) -->
     <aside
-      class="hidden md:flex md:flex-col w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen bg-white/90 backdrop-blur border-r border-slate-200/60 shadow-sm"
-    >
+      class="hidden md:flex md:flex-col w-64 flex-shrink-0 md:sticky md:top-0 md:h-screen bg-[var(--bg-surface)]/90 backdrop-blur border-r border-[var(--border-subtle)]/60 shadow-sm">
       <!-- Logo / Brand -->
-      <div class="h-16 flex items-center px-5 border-b border-slate-100/70">
-        <NuxtLink
-          to="/customer"
-          class="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-xl"
-        >
+      <div class="h-16 flex items-center px-5 border-b border-[var(--border-subtle)]/70">
+        <NuxtLink to="/customer"
+          class="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-xl">
           <div class="h-10 w-10 flex items-center justify-center">
-            <img
-              src="/logo.png"
-              alt="BKKService"
-              class="h-6 w-auto object-contain"
-            />
+            <img src="/logo.png" alt="BKKService" class="h-6 w-auto object-contain" />
           </div>
           <div class="leading-tight">
-            <p class="text-[13px] font-semibold tracking-tight text-slate-900">
+            <p class="text-[13px] font-semibold tracking-tight text-[var(--text-primary)]">
               BKKService
             </p>
-            <p class="text-[11px] text-slate-400">Customer Portal</p>
+            <p class="text-[11px] text-[var(--text-secondary)]">Customer Portal</p>
           </div>
         </NuxtLink>
       </div>
@@ -31,76 +22,43 @@
       <!-- Nav (DESKTOP) -->
       <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         <template v-for="(item, index) in sidebarMenu">
-          <NuxtLink
-            v-if="!item.external"
-            :key="item.to"
-            :to="item.to"
-            @click="handleNavClick(index, item)"
+          <NuxtLink v-if="!item.external" :key="item.to" :to="item.to" @click="handleNavClick(index, item)"
             class="group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-            :class="
-              nav.activeIndex === index
-                ? 'bg-blue-400 text-white shadow-sm'
-                : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 ring-1 ring-transparent hover:ring-slate-200'
-            "
-          >
-            <span
-              class="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full transition-colors"
-              :class="
-                nav.activeIndex === index
-                  ? 'bg-white/80'
-                  : 'bg-transparent group-hover:bg-slate-300'
-              "
-            />
-            <component
-              :is="item.icon"
-              class="w-5 h-5 shrink-0 transition-colors"
-              :class="
-                nav.activeIndex === index
-                  ? 'text-white'
-                  : 'text-slate-400 group-hover:text-slate-700'
-              "
-            />
+            :class="nav.activeIndex === index
+              ? 'bg-[var(--color-primary-500)] text-[var(--text-on-primary)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)] hover:text-[var(--text-primary)] ring-1 ring-transparent hover:ring-[var(--border-subtle)]'
+              ">
+            <span class="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full transition-colors" :class="nav.activeIndex === index
+              ? 'bg-[var(--bg-surface)]/80'
+              : 'bg-transparent group-hover:bg-[var(--color-secondary-300)]'
+              " />
+            <component :is="item.icon" class="w-5 h-5 shrink-0 transition-colors" :class="nav.activeIndex === index
+              ? 'text-[var(--text-on-primary)]'
+              : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
+              " />
             <span class="truncate">{{ item.label }}</span>
-            <span
-              v-if="item.badge"
-              class="ml-auto text-[10px] px-2 py-0.5 rounded-full leading-none transition bg-red-600 text-white shadow-sm"
-            >
+            <span v-if="item.badge"
+              class="ml-auto text-[10px] px-2 py-0.5 rounded-full leading-none transition bg-[var(--color-error-500)] text-white shadow-sm">
               {{ item.badge }}
             </span>
           </NuxtLink>
-          <button
-            v-else
-            type="button"
-            @click="handleNavClick(index, item)"
+          <button v-else type="button" @click="handleNavClick(index, item)"
             class="group relative flex w-full items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-            :class="
-              nav.activeIndex === index
-                ? 'bg-blue-400 text-white shadow-sm'
-                : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 ring-1 ring-transparent hover:ring-slate-200'
-            "
-          >
-            <span
-              class="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full transition-colors"
-              :class="
-                nav.activeIndex === index
-                  ? 'bg-white/80'
-                  : 'bg-transparent group-hover:bg-slate-300'
-              "
-            />
-            <component
-              :is="item.icon"
-              class="w-5 h-5 shrink-0 transition-colors"
-              :class="
-                nav.activeIndex === index
-                  ? 'text-white'
-                  : 'text-slate-400 group-hover:text-slate-700'
-              "
-            />
+            :class="nav.activeIndex === index
+              ? 'bg-[var(--color-primary-500)] text-[var(--text-on-primary)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)] hover:text-[var(--text-primary)] ring-1 ring-transparent hover:ring-[var(--border-subtle)]'
+              ">
+            <span class="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full transition-colors" :class="nav.activeIndex === index
+              ? 'bg-[var(--bg-surface)]/80'
+              : 'bg-transparent group-hover:bg-[var(--color-secondary-300)]'
+              " />
+            <component :is="item.icon" class="w-5 h-5 shrink-0 transition-colors" :class="nav.activeIndex === index
+              ? 'text-[var(--text-on-primary)]'
+              : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
+              " />
             <span class="truncate">{{ item.label }}</span>
-            <span
-              v-if="item.badge"
-              class="ml-auto text-[10px] px-2 py-0.5 rounded-full leading-none transition bg-red-600 text-white shadow-sm"
-            >
+            <span v-if="item.badge"
+              class="ml-auto text-[10px] px-2 py-0.5 rounded-full leading-none transition bg-[var(--color-error-500)] text-white shadow-sm">
               {{ item.badge }}
             </span>
           </button>
@@ -112,18 +70,13 @@
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Top bar -->
       <header
-        class="h-16 flex items-center justify-between px-3 sm:px-5 md:px-7 border-b border-slate-200/70 bg-white/80 backdrop-blur sticky top-0 z-50"
-      >
+        class="h-16 flex items-center justify-between px-3 sm:px-5 md:px-7 border-b border-[var(--border-subtle)]/70 bg-[var(--bg-surface)]/80 backdrop-blur sticky top-0 z-50">
         <!-- Left -->
         <div class="flex items-center gap-2 sm:gap-3">
           <!-- Mobile menu button -->
-          <button
-            type="button"
-            aria-label="เปิดเมนู"
-            class="md:hidden inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white h-9 w-9 text-slate-600 hover:bg-slate-50 active:scale-[0.97] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-            @click="sidebarOpen = !sidebarOpen"
-            :aria-expanded="sidebarOpen"
-          >
+          <button type="button" aria-label="เปิดเมนู"
+            class="md:hidden inline-flex items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] h-9 w-9 text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)] active:scale-[0.97] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+            @click="sidebarOpen = !sidebarOpen" :aria-expanded="sidebarOpen">
             <Menu class="w-4 h-4" />
           </button>
         </div>
@@ -132,17 +85,11 @@
         <div class="relative flex items-center gap-1.5 sm:gap-2 md:gap-3">
           <!-- Notification (container = button + dropdown) -->
           <div class="relative" ref="notifRoot" @keydown.escape="closeAllMenus">
-            <button
-              type="button"
-              aria-label="การแจ้งเตือน"
-              class="relative inline-flex items-center justify-center rounded-full border border-slate-300 bg-white h-8 w-8 sm:h-9 sm:w-9 text-slate-600 hover:bg-slate-50 active:scale-[0.97] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-              @click.stop="toggleNotif"
-              :aria-expanded="notifOpen"
-            >
-              <span
-                v-if="unreadCount > 0"
-                class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 ring-2 ring-white text-[10px] leading-[14px] text-white flex items-center justify-center"
-              >
+            <button type="button" aria-label="การแจ้งเตือน"
+              class="relative inline-flex items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--bg-surface)] h-8 w-8 sm:h-9 sm:w-9 text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)] active:scale-[0.97] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+              @click.stop="toggleNotif" :aria-expanded="notifOpen">
+              <span v-if="unreadCount > 0"
+                class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--color-error-500)] ring-2 ring-white text-[10px] leading-[14px] text-white flex items-center justify-center">
                 {{ unreadCount > 9 ? "9+" : unreadCount }}
               </span>
               <Bell class="w-4 h-4" />
@@ -150,95 +97,73 @@
 
             <!-- Dropdown -->
             <transition name="dropdown">
-              <div
-                v-if="notifOpen"
-                class="absolute right-0 top-11 z-40 w-[22rem] max-w-[92vw] rounded-2xl bg-white/95 backdrop-blur border border-slate-200 shadow-lg ring-1 ring-slate-200 p-3 space-y-2 origin-top-right"
-              >
+              <div v-if="notifOpen"
+                class="absolute right-0 top-11 z-40 w-[22rem] max-w-[92vw] rounded-2xl bg-[var(--bg-surface)]/95 backdrop-blur border border-[var(--border-subtle)] shadow-lg ring-1 ring-[var(--border-subtle)] p-3 space-y-2 origin-top-right">
                 <!-- Pointer -->
                 <div
-                  class="absolute -top-2 right-8 h-4 w-4 bg-white border border-slate-200 ring-1 ring-slate-200 rotate-45 rounded-sm"
-                ></div>
+                  class="absolute -top-2 right-8 h-4 w-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] ring-1 ring-[var(--border-subtle)] rotate-45 rounded-sm">
+                </div>
 
                 <!-- Header -->
                 <div class="flex items-center justify-between px-1">
                   <div>
-                    <p class="text-[13px] font-semibold text-slate-900">
+                    <p class="text-[13px] font-semibold text-[var(--text-primary)]">
                       การแจ้งเตือน
                     </p>
-                    <p class="text-[11px] text-slate-400">อัปเดตล่าสุด</p>
+                    <p class="text-[11px] text-[var(--text-secondary)]">อัปเดตล่าสุด</p>
                   </div>
                   <div class="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      class="text-[11px] px-2 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-                      @click="markAllRead"
-                    >
+                    <button type="button"
+                      class="text-[11px] px-2 py-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:bg-[var(--color-secondary-50)] text-[var(--text-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                      @click="markAllRead">
                       อ่านทั้งหมด
                     </button>
-                    <NuxtLink
-                      to="/customer/notifications"
-                      class="text-[11px] px-2 py-1 rounded-lg border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700"
-                    >
+                    <NuxtLink to="/customer/notifications"
+                      class="text-[11px] px-2 py-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--color-secondary-100)] hover:bg-[var(--color-secondary-200)] text-[var(--text-secondary)]">
                       ดูทั้งหมด
                     </NuxtLink>
                   </div>
                 </div>
 
                 <!-- เส้นคั่นระหว่างหัวกับรายการ -->
-                <div class="mt-2 mb-1 border-t border-slate-100"></div>
+                <div class="mt-2 mb-1 border-t border-[var(--color-secondary-100)]"></div>
 
                 <!-- List -->
                 <ul class="max-h-80 overflow-y-auto">
-                  <li
-                    v-for="n in notifications"
-                    :key="n.id"
-                    class="group flex items-start gap-3 px-2 py-2.5 border-b border-slate-100 last:border-b-0 hover:bg-slate-50/80 transition"
-                  >
-                    <component
-                      :is="typeToIcon(n.type)"
-                      class="w-5 h-5 mt-0.5 shrink-0"
-                      :class="typeStyles[n.type]"
-                    />
+                  <li v-for="n in notifications" :key="n.id"
+                    class="group flex items-start gap-3 px-2 py-2.5 border-b border-[var(--color-secondary-100)] last:border-b-0 hover:bg-[var(--color-secondary-50)]/80 transition">
+                    <component :is="typeToIcon(n.type)" class="w-5 h-5 mt-0.5 shrink-0" :class="typeStyles[n.type]" />
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-2">
-                        <p
-                          class="text-[13px] font-medium text-slate-900 truncate"
-                        >
+                        <p class="text-[13px] font-medium text-[var(--text-primary)] truncate">
                           {{ n.title }}
                         </p>
-                        <span
-                          v-if="!n.read"
-                          class="inline-block h-1.5 w-1.5 rounded-full bg-blue-600"
-                        ></span>
+                        <span v-if="!n.read"
+                          class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-primary-600)]"></span>
                       </div>
-                      <p class="text-[12px] text-slate-600 line-clamp-2">
+                      <p class="text-[12px] text-[var(--text-secondary)] line-clamp-2">
                         {{ n.desc }}
                       </p>
-                      <p class="text-[11px] text-slate-400 mt-0.5">
+                      <p class="text-[11px] text-[var(--text-secondary)] mt-0.5">
                         {{ formatTime(n.time) }}
                       </p>
                     </div>
                     <div class="flex gap-1.5">
-                      <button
-                        type="button"
-                        class="rounded-md border border-slate-300 bg-white px-1.5 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
-                        @click.stop="toggleRead(n.id)"
-                      >
+                      <button type="button"
+                        class="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-1.5 py-1 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)]"
+                        @click.stop="toggleRead(n.id)">
                         {{ n.read ? "ยังไม่อ่าน" : "อ่านแล้ว" }}
                       </button>
-                      <button
-                        type="button"
-                        class="rounded-md border border-slate-300 bg-white px-1.5 py-1 text-[11px] text-slate-600 hover:bg-slate-50"
-                        @click.stop="removeNotif(n.id)"
-                        aria-label="ลบการแจ้งเตือน"
-                      >
+                      <button type="button"
+                        class="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-1.5 py-1 text-[11px] text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)]"
+                        @click.stop="removeNotif(n.id)" aria-label="ลบการแจ้งเตือน">
                         ลบ
                       </button>
                     </div>
                   </li>
 
                   <li v-if="notifications.length === 0" class="p-4 text-center">
-                    <p class="text-[13px] text-slate-500">
+                    <p class="text-[13px] text-[var(--text-secondary)]">
                       ยังไม่มีการแจ้งเตือน
                     </p>
                   </li>
@@ -248,73 +173,56 @@
 
             <!-- click-away overlay (ต่ำกว่า dropdown และ header) -->
             <transition name="fade">
-              <div
-                v-if="notifOpen"
-                class="fixed inset-0 z-30"
-                @click="closeAllMenus"
-              ></div>
+              <div v-if="notifOpen" class="fixed inset-0 z-30" @click="closeAllMenus"></div>
             </transition>
           </div>
 
           <!-- User menu (container = buttons + dropdown) -->
           <div class="relative" ref="userMenuRoot">
             <!-- User pill (desktop/tablet) -->
-            <button
-              type="button"
+            <button type="button"
               class="hidden sm:flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60"
               :class="[
                 userMenuOpen
-                  ? 'bg-white border-blue-300 ring-2 ring-blue-200 shadow-sm'
-                  : 'bg-white border-slate-300 hover:bg-slate-50',
-              ]"
-              @click.stop="toggleUserMenu"
-              :aria-expanded="userMenuOpen"
-            >
+                  ? 'bg-[var(--bg-surface)] border-[var(--color-primary-300)] ring-2 ring-[var(--color-primary-200)] shadow-sm'
+                  : 'bg-[var(--bg-surface)] border-[var(--border-subtle)] hover:bg-[var(--color-secondary-50)]',
+              ]" @click.stop="toggleUserMenu" :aria-expanded="userMenuOpen">
               <div
-                class="h-7 w-7 rounded-full bg-white border border-slate-300 flex items-center justify-center text-[11px] font-semibold text-slate-700 shadow-sm"
-              >
+                class="h-7 w-7 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[11px] font-semibold text-[var(--text-secondary)] shadow-sm">
                 CU
               </div>
               <div class="leading-tight min-w-0">
-                <p class="text-[11px] font-medium text-slate-800 truncate">
+                <p class="text-[11px] font-medium text-[var(--text-primary)] truncate">
                   Customer User
                 </p>
-                <p class="text-[10px] text-slate-400 truncate">
+                <p class="text-[10px] text-[var(--text-secondary)] truncate">
                   โรงเรียนรัตนโกสินทร์
                 </p>
               </div>
-              <ChevronDown
-                class="w-4 h-4 ml-0.5 transition-transform duration-200 text-slate-400"
-                :class="userMenuOpen ? 'rotate-180 text-slate-600' : ''"
-              />
+              <ChevronDown class="w-4 h-4 ml-0.5 transition-transform duration-200 text-[var(--text-secondary)]"
+                :class="userMenuOpen ? 'rotate-180 text-[var(--text-primary)]' : ''" />
             </button>
 
             <!-- Avatar button (mobile) -->
-            <button
-              type="button"
-              class="sm:hidden inline-flex items-center justify-center rounded-full border border-slate-300 bg-slate-100 h-8 w-8 text-[11px] font-semibold text-slate-700 active:scale-[0.97] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-              @click.stop="toggleUserMenu"
-              :aria-expanded="userMenuOpen"
-            >
+            <button type="button"
+              class="sm:hidden inline-flex items-center justify-center rounded-full border border-[var(--border-subtle)] bg-[var(--color-secondary-100)] h-8 w-8 text-[11px] font-semibold text-[var(--text-secondary)] active:scale-[0.97] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+              @click.stop="toggleUserMenu" :aria-expanded="userMenuOpen">
               CU
             </button>
 
             <!-- Dropdown user card -->
             <transition name="dropdown">
-              <div
-                v-if="userMenuOpen"
-                class="absolute right-0 top-11 w-64 sm:w-72 max-w-[92vw] rounded-2xl bg-white/95 backdrop-blur border border-slate-200 shadow-lg ring-1 ring-slate-200 p-3 space-y-3 origin-top-right z-40"
-                @keydown.escape="closeAllMenus"
-              >
+              <div v-if="userMenuOpen"
+                class="absolute right-0 top-11 w-64 sm:w-72 max-w-[92vw] rounded-2xl bg-[var(--bg-surface)]/95 backdrop-blur border border-[var(--border-subtle)] shadow-lg ring-1 ring-[var(--border-subtle)] p-3 space-y-3 origin-top-right z-40"
+                @keydown.escape="closeAllMenus">
                 <!-- Pointer -->
                 <div
-                  class="absolute -top-2 right-8 h-4 w-4 bg-white border border-slate-200 ring-1 ring-slate-200 rotate-45 rounded-sm"
-                ></div>
+                  class="absolute -top-2 right-8 h-4 w-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] ring-1 ring-[var(--border-subtle)] rotate-45 rounded-sm">
+                </div>
 
                 <div class="relative flex items-center gap-3">
                   <div
-                    class="h-9 w-9 rounded-full bg-white border border-slate-300 flex items-center justify-center text-xs font-semibold text-slate-700 shadow-sm"
-                  >
+                    class="h-9 w-9 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-semibold text-[var(--text-secondary)] shadow-sm">
                     CU
                   </div>
                   <div class="min-w-0">
@@ -327,10 +235,8 @@
                   </div>
                 </div>
                 <div class="grid grid-cols-1 gap-1.5">
-                  <button
-                    type="button"
-                    class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-3 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-200 active:scale-[0.98] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-                  >
+                  <button type="button"
+                    class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--color-secondary-100)] px-3 py-1.5 text-[11px] font-medium text-[var(--text-secondary)] hover:bg-[var(--color-secondary-200)] active:scale-[0.98] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40">
                     <LogOut class="w-3.5 h-3.5" />
                     ออกจากระบบ
                   </button>
@@ -345,77 +251,46 @@
       <div class="md:hidden">
         <!-- backdrop fade -->
         <transition name="fade">
-          <div
-            v-if="sidebarOpen"
-            class="fixed inset-0 z-40 bg-slate-900/40"
-            @click="sidebarOpen = false"
-          ></div>
+          <div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-[var(--color-secondary-900)]/40"
+            @click="sidebarOpen = false"></div>
         </transition>
 
         <!-- sidebar slide-in -->
         <transition name="sidebar">
-          <aside
-            v-if="sidebarOpen"
-            class="fixed z-50 top-0 left-0 h-full w-72 max-w-[80vw] bg-white/95 backdrop-blur border-r border-slate-200 shadow-md flex flex-col rounded-r-3xl"
-          >
-            <div
-              class="h-16 flex items-center justify-between px-4 border-b border-slate-100/70"
-            >
+          <aside v-if="sidebarOpen"
+            class="fixed z-50 top-0 left-0 h-full w-72 max-w-[80vw] bg-[var(--bg-surface)]/95 backdrop-blur border-r border-[var(--border-subtle)] shadow-md flex flex-col rounded-r-3xl">
+            <div class="h-16 flex items-center justify-between px-4 border-b border-[var(--border-subtle)]/70">
               <div class="flex items-center gap-2">
-                <img
-                  src="/logo.png"
-                  alt="BKKService"
-                  class="h-7 w-auto object-contain"
-                />
-                <span class="text-sm font-semibold text-slate-900"
-                  >เมนูลูกค้า</span
-                >
+                <img src="/logo.png" alt="BKKService" class="h-7 w-auto object-contain" />
+                <span class="text-sm font-semibold text-[var(--text-primary)]">เมนูลูกค้า</span>
               </div>
               <button
-                class="rounded-full border border-slate-300 h-8 w-8 flex items-center justify-center text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-                @click="sidebarOpen = false"
-                aria-label="ปิดเมนู"
-              >
+                class="rounded-full border border-[var(--border-subtle)] h-8 w-8 flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                @click="sidebarOpen = false" aria-label="ปิดเมนู">
                 ✕
               </button>
             </div>
 
             <!-- Nav (MOBILE) -->
             <nav class="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
-              <NuxtLink
-                v-for="(item, index) in sidebarMenu"
-                :key="item.to + '-mobile'"
-                :to="item.to"
+              <NuxtLink v-for="(item, index) in sidebarMenu" :key="item.to + '-mobile'" :to="item.to"
                 class="group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all active:translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
-                :class="
-                  nav.activeIndex === index
-                    ? 'bg-blue-400 text-white ring-1 ring-blue-200 shadow-sm'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 ring-1 ring-transparent hover:ring-slate-200'
-                "
-                @click="handleNavClick(index, item)"
-              >
-                <span
-                  class="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full transition-colors"
-                  :class="
-                    nav.activeIndex === index
-                      ? 'bg-white/80'
-                      : 'bg-transparent group-hover:bg-slate-300'
-                  "
-                />
-                <component
-                  :is="item.icon"
-                  class="w-5 h-5 shrink-0 transition-colors"
-                  :class="
-                    nav.activeIndex === index
-                      ? 'text-white'
-                      : 'text-slate-400 group-hover:text-slate-700'
-                  "
-                />
+                :class="nav.activeIndex === index
+                  ? 'bg-[var(--color-primary-500)] text-[var(--text-on-primary)] ring-1 ring-[var(--color-primary-200)] shadow-sm'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--color-secondary-50)] hover:text-[var(--text-primary)] ring-1 ring-transparent hover:ring-[var(--border-subtle)]'
+                  " @click="handleNavClick(index, item)">
+                <span class="absolute left-1 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full transition-colors"
+                  :class="nav.activeIndex === index
+                    ? 'bg-[var(--bg-surface)]/80'
+                    : 'bg-transparent group-hover:bg-[var(--color-secondary-300)]'
+                    " />
+                <component :is="item.icon" class="w-5 h-5 shrink-0 transition-colors" :class="nav.activeIndex === index
+                  ? 'text-[var(--text-on-primary)]'
+                  : 'text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]'
+                  " />
                 <span class="truncate">{{ item.label }}</span>
-                <span
-                  v-if="item.badge"
-                  class="ml-auto text-[10px] px-2 py-0.5 rounded-full leading-none transition bg-red-600 text-white shadow-sm"
-                >
+                <span v-if="item.badge"
+                  class="ml-auto text-[10px] px-2 py-0.5 rounded-full leading-none transition bg-[var(--color-error-500)] text-white shadow-sm">
                   {{ item.badge }}
                 </span>
               </NuxtLink>
@@ -594,12 +469,12 @@ const notifications = ref<Notif[]>([
 ]);
 
 const typeToIcon = (t: NotifType) =>
-  ({
-    new: PlusCircle,
-    progress: Loader2,
-    done: CheckCircle2,
-    alert: AlertTriangle,
-  }[t]);
+({
+  new: PlusCircle,
+  progress: Loader2,
+  done: CheckCircle2,
+  alert: AlertTriangle,
+}[t]);
 
 const typeStyles: Record<NotifType, string> = {
   new: "text-blue-500",
@@ -702,6 +577,7 @@ const isActive = (path: string) =>
 .fade-leave-active {
   transition: opacity 0.18s ease-out;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -712,6 +588,7 @@ const isActive = (path: string) =>
 .sidebar-leave-active {
   transition: transform 0.24s ease-out, opacity 0.24s ease-out;
 }
+
 .sidebar-enter-from,
 .sidebar-leave-to {
   transform: translateX(-14px);
@@ -723,6 +600,7 @@ const isActive = (path: string) =>
 .sidebar-leave-active {
   transition: transform 0.24s ease-out, opacity 0.24s ease-out;
 }
+
 .sidebar-enter-from,
 .sidebar-leave-to {
   transform: translateX(-100%);
@@ -734,6 +612,7 @@ const isActive = (path: string) =>
 .page-leave-active {
   transition: opacity 0.18s ease-out, transform 0.18s ease-out;
 }
+
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
@@ -742,6 +621,7 @@ const isActive = (path: string) =>
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   .fade-enter-active,
   .fade-leave-active,
   .sidebar-enter-active,

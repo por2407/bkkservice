@@ -1,0 +1,21 @@
+meta {
+  name: getStartDate
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:3001/api/tasks/date-task?userCode=440020&jobNo=T68120001
+  body: none
+  auth: inherit
+}
+
+params:query {
+  userCode: 440020
+  jobNo: T68120001
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

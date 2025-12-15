@@ -3,6 +3,7 @@ import cors from "cors";
 import { apiRouter } from "./api/routes.js";
 import { corsOptions } from "./config/corsOption.js";
 import { imageUploadDir } from "./config/upload.js";
+import { errorHandler } from "./shared/middleware/errorHandler.js";
 
 export function createApp() {
   const app = express();
@@ -14,6 +15,8 @@ export function createApp() {
 
   app.use("/api", apiRouter);
   app.get("/test", (req, res) => res.status(200).json({ message: "ok" }));
+
+  app.use(errorHandler);
 
   return app;
 }

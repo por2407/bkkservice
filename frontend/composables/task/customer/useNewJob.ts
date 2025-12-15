@@ -13,6 +13,7 @@ export interface UploadItem {
   status: UploadStatus;
   error?: string;
   file?: File;
+  preview?: string;
 }
 
 export function useNewJob() {
@@ -205,6 +206,7 @@ export function useNewJob() {
           ? "ไฟล์รูปนี้มีขนาดเกิน 1000KB หลังบีบอัด/ตรวจสอบ"
           : undefined,
         file: finalFile,
+        preview: isImage ? URL.createObjectURL(finalFile) : undefined,
       };
 
       uploads.value.push(item);

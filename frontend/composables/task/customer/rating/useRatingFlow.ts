@@ -9,63 +9,63 @@ interface RatingItem {
 export function useRatingFlow(task: MaybeRef<TaskDetail | null>) {
   const taskRef = computed(() => unref(task));
 
-  const ratingItems: RatingItem[] = [
-    { id: "overall", label: "ภาพรวม" },
-    { id: "speed", label: "ความเร็ว" },
-    { id: "quality", label: "ฝีมือ" },
-    { id: "clean", label: "ความสะอาด" },
-    { id: "polite", label: "มารยาท" },
-    { id: "explain", label: "การอธิบาย" },
-  ];
+  const ratingItems = computed(
+    (): RatingItem[] =>
+      taskRef.value?.ratingItems ?? [
+        { id: "1", label: "เจ้าหน้าที่เดินทางมาให้บริการภายในเวลาที่นัดหมาย" },
+        {
+          id: "2",
+          label: "เจ้าหน้าที่สามารถแก้ไขปัญหาได้ภายในเวลาที่กำหนดความเร็ว",
+        },
+        {
+          id: "3",
+          label:
+            "เจ้าหน้าที่ให้บริการด้วยถ้อยคำสุภาพ  แต่งกายสุภาพ และมีความเอาใจใส่ในการให้บริการ",
+        },
+        { id: "4", label: "เจ้าหน้าที่มีทักษะในการปฏิบัติงาน" },
+        {
+          id: "5",
+          label:
+            "เจ้าหน้าที่มีความสามารถในการแก้ไขงานได้ครบถ้วนตามที่ได้รับมอบหมาย",
+        },
+        { id: "6", label: "ท่านมีความพึงพอใจต่อการให้บริการในครั้งนี้" },
+      ]
+  );
 
-  const tempRatingScores = ref<number[]>([0, 0, 0, 0, 0, 0]);
+  const tempRatingScores = ref<Record<string, number>>({});
+  const averageRating = computed<string | null>(() => {
+    const r = taskRef.value?.rating ?? null;
+    return r === null ? null : String(r);
+  });
+  const hasRatedThisTask = computed(
+    () => !!taskRef.value?.canRate && averageRating.value !== null
+  );
 
   const ratingModalOpen = ref(false);
   const ratingSuccessModalOpen = ref(false);
   const ratingLoading = ref(false);
 
-  // เก็บคะแนนแยกตาม taskId
-  const taskRatings = ref<Record<string, number[]>>({});
+  const ratingSuccessSummary = reactive({
+    star: 0,
+    datest: "-",
+    dateed: "-",
+    vpoint: 0,
+  });
 
   const canRateThisTask = computed(() => {
     const t = taskRef.value;
     return t?.status === "done";
   });
 
-  const currentRatingScores = computed<number[] | null>(() => {
-    const t = taskRef.value;
-    if (!t) return null;
-    return taskRatings.value[t.id] || null;
-  });
-
-  const hasRatedThisTask = computed(() => {
-    const scores = currentRatingScores.value;
-    return !!scores && scores.length === 6;
-  });
-
-  const averageRating = computed<string | null>(() => {
-    const scores = currentRatingScores.value;
-    if (!scores || !scores.length) return null;
-    const sum = scores.reduce((a, b) => a + b, 0);
-    return (sum / scores.length).toFixed(1);
-  });
-
   const canSubmitRating = computed(() =>
-    tempRatingScores.value.every((s) => s > 0)
+    ratingItems.value.every((it) => (tempRatingScores.value[it.id] ?? 0) > 0)
   );
 
-  const setTempScore = (index: number, score: number) => {
-    const arr = [...tempRatingScores.value];
-    arr[index] = score;
-    tempRatingScores.value = arr;
+  const setTempScore = (id: string, score: number) => {
+    tempRatingScores.value = { ...tempRatingScores.value, [id]: score };
   };
 
   const openRatingModal = () => {
-    const existing = currentRatingScores.value;
-    tempRatingScores.value = existing
-      ? [...existing]
-      : [0, 0, 0, 0, 0, 0];
-
     ratingModalOpen.value = true;
   };
 
@@ -77,18 +77,46 @@ export function useRatingFlow(task: MaybeRef<TaskDetail | null>) {
   const submitRating = async () => {
     const t = taskRef.value;
     if (!t) return;
-    if (!canSubmitRating.value || hasRatedThisTask.value || ratingLoading.value)
-      return;
+    if (!canSubmitRating.value || ratingLoading.value) return;
 
     ratingLoading.value = true;
 
     try {
+      const scoreList = ratingItems.value.map((it) => ({
+        id: it.id,
+        score: tempRatingScores.value[it.id] ?? 0,
+      }));
       // mock API
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      taskRatings.value[t.id] = [...tempRatingScores.value];
+      // const sum = (
+      //   tempRatingScores.value.reduce((a, b) => a + b, 0) /
+      //   tempRatingScores.value.length
+      // ).toFixed(1);
+
+      const scores = ratingItems.value.map(
+        (it) => tempRatingScores.value[it.id] ?? 0
+      );
+      const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+      const sum = Math.round(avg);
+
+      if (taskRef.value) {
+        taskRef.value.rating = sum;
+        taskRef.value.canRate = true;
+      }
+
+      Object.assign(ratingSuccessSummary, {
+        star: Number(averageRating.value ?? 0),
+        datest: "12/12/68",
+        dateed: "12/12/68",
+        vpoint: 8,
+      });
+
       ratingModalOpen.value = false;
       ratingSuccessModalOpen.value = true;
+
+      console.log("score", sum);
+      console.log("scoreList", JSON.stringify(scoreList, null, 2));
     } catch (err) {
       console.error("submitRating error:", err);
     } finally {
@@ -105,7 +133,6 @@ export function useRatingFlow(task: MaybeRef<TaskDetail | null>) {
     ratingLoading,
 
     canRateThisTask,
-    currentRatingScores,
     hasRatedThisTask,
     averageRating,
     canSubmitRating,
@@ -114,5 +141,7 @@ export function useRatingFlow(task: MaybeRef<TaskDetail | null>) {
     openRatingModal,
     closeRatingModal,
     submitRating,
+
+    ratingSuccessSummary,
   };
 }

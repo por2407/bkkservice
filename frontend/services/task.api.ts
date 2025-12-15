@@ -1,4 +1,4 @@
-import type { Task, TaskDetail, TaskStatus } from "@/types/task";
+import type { PayLoadActive, PayLoadActiveFinish } from "@/types/task";
 import { useBuildPayload } from "@/composables/useBuildPayload";
 import axios, { type AxiosProgressEvent } from "axios";
 
@@ -18,17 +18,17 @@ export const taskApi = {
     });
   },
 
-  async getTimeline(id: string) {
-    await new Promise((r) => setTimeout(r, 200))
+  async getTimeline(id: string, isCanRate: boolean) {
+    await new Promise((r) => setTimeout(r, 200));
     const config = useRuntimeConfig();
     return await $fetch<any[]>(`/api/tasks/time-line`, {
       baseURL: config.public.apiBase,
-      query: useBuildPayload({ tarNo: id }),
+      query: useBuildPayload({ tarNo: id, isCanRate }),
     });
   },
 
   async getDetail(id: string) {
-    await new Promise((r) => setTimeout(r, 200))
+    await new Promise((r) => setTimeout(r, 200));
     const config = useRuntimeConfig();
     return await $fetch<any>(`/api/tasks/detail`, {
       baseURL: config.public.apiBase,
@@ -67,6 +67,7 @@ export const taskApi = {
       formData.append("image", file);
     });
 
+    await new Promise((r) => setTimeout(r, 200));
     // 4) ยิงไป backend จริง ผ่าน baseURL จาก runtimeConfig
     return await axios.post(
       `${config.public.apiBase}/api/tasks/create-task`,
@@ -76,6 +77,38 @@ export const taskApi = {
           "Content-Type": "multipart/form-data",
         },
         onUploadProgress,
+      }
+    );
+  },
+
+  async activeTask(data = {} as PayLoadActive) {
+    const config = useRuntimeConfig();
+    await new Promise((r) => setTimeout(r, 200));
+    return await $fetch<any>(`/api/tasks/update-status/${data.typeSeq}`, {
+      baseURL: config.public.apiBase,
+      method: "put",
+      body: useBuildPayload({ jobNo: data.jobNo, typeCode: data.typeCode }),
+    });
+  },
+
+  async getTaskDate(jobNo: string) {
+    const config = useRuntimeConfig();
+    return await $fetch<any>(`/api/tasks/date-task`, {
+      baseURL: config.public.apiBase,
+      method: "get",
+      query: useBuildPayload({ jobNo }),
+    });
+  },
+
+  async activeTaskFinish(data = {} as PayLoadActiveFinish) {
+    const config = useRuntimeConfig();
+    await new Promise((r) => setTimeout(r, 200));
+    return await $fetch<any>(
+      `/api/tasks/update-status-finish/${data.typeSeq}`,
+      {
+        baseURL: config.public.apiBase,
+        method: "put",
+        body: useBuildPayload({ ...data }),
       }
     );
   },

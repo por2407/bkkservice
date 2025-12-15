@@ -1,0 +1,18 @@
+-- File: SV_SERVICE_TYPE_R.sql
+-- Oracle 11g - Create table SV_SERVICE_TYPE_R
+
+CREATE TABLE SV_SERVICE_TYPE_R
+(
+    SSTR_TYPE      VARCHAR2(1),
+    SSTR_DESC      VARCHAR2(1000),
+    SSTR_DAY       NUMBER(3),
+    SSTR_USER_ID   VARCHAR2(20),
+    SSTR_USER_DATE DATE
+);
+
+-- ===== Column Comments =====
+COMMENT ON COLUMN SV_SERVICE_TYPE_R.SSTR_TYPE      IS 'รหัสประเภทงานให้บริการ';
+COMMENT ON COLUMN SV_SERVICE_TYPE_R.SSTR_DESC      IS 'รายละเอียด';
+COMMENT ON COLUMN SV_SERVICE_TYPE_R.SSTR_DAY       IS 'จำนวนวันที่คาดว่าดำเนินการให้แล้วเสร็จ';
+COMMENT ON COLUMN SV_SERVICE_TYPE_R.SSTR_USER_ID   IS 'รหัสผู้ใช้งาน';
+COMMENT ON COLUMN SV_SERVICE_TYPE_R.SSTR_USER_DATE IS 'วันที่ผู้ใช้งาน';

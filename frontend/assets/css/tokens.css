@@ -1,0 +1,315 @@
+@layer base {
+  :root {
+    /* Color Palette - Primary */
+    --color-primary-50: theme('colors.primary.50');
+    --color-primary-100: theme('colors.primary.100');
+    --color-primary-200: theme('colors.primary.200');
+    --color-primary-300: theme('colors.primary.300');
+    --color-primary-400: theme('colors.primary.400');
+    --color-primary-500: theme('colors.primary.DEFAULT');
+    --color-primary-600: theme('colors.primary.600');
+    --color-primary-700: theme('colors.primary.700');
+    --color-primary-800: theme('colors.primary.800');
+    --color-primary-900: theme('colors.primary.900');
+    --color-primary-950: theme('colors.primary.950');
+
+    /* Color Palette - Secondary */
+    --color-secondary-50: theme('colors.secondary.50');
+    --color-secondary-100: theme('colors.secondary.100');
+    --color-secondary-200: theme('colors.secondary.200');
+    --color-secondary-300: theme('colors.secondary.300');
+    --color-secondary-400: theme('colors.secondary.400');
+    --color-secondary-500: theme('colors.secondary.DEFAULT');
+    --color-secondary-600: theme('colors.secondary.600');
+    --color-secondary-700: theme('colors.secondary.700');
+    --color-secondary-800: theme('colors.secondary.800');
+    --color-secondary-900: theme('colors.secondary.900');
+    --color-secondary-950: theme('colors.secondary.950');
+
+    /* Color Palette - Info */
+    --color-info-50: theme('colors.info.50');
+    --color-info-100: theme('colors.info.100');
+    --color-info-200: theme('colors.info.200');
+    --color-info-300: theme('colors.info.300');
+    --color-info-400: theme('colors.info.400');
+    --color-info-500: theme('colors.info.DEFAULT');
+    --color-info-600: theme('colors.info.600');
+    --color-info-700: theme('colors.info.700');
+    --color-info-800: theme('colors.info.800');
+    --color-info-900: theme('colors.info.900');
+    --color-info-950: theme('colors.info.950');
+
+    /* Color Palette - Success */
+    --color-success-50: theme('colors.success.50');
+    --color-success-100: theme('colors.success.100');
+    --color-success-200: theme('colors.success.200');
+    --color-success-300: theme('colors.success.300');
+    --color-success-400: theme('colors.success.400');
+    --color-success-500: theme('colors.success.DEFAULT');
+    --color-success-600: theme('colors.success.600');
+    --color-success-700: theme('colors.success.700');
+    --color-success-800: theme('colors.success.800');
+    --color-success-900: theme('colors.success.900');
+    --color-success-950: theme('colors.success.950');
+
+    /* Color Palette - Warning */
+    --color-warning-50: theme('colors.warning.50');
+    --color-warning-100: theme('colors.warning.100');
+    --color-warning-200: theme('colors.warning.200');
+    --color-warning-300: theme('colors.warning.300');
+    --color-warning-400: theme('colors.warning.400');
+    --color-warning-500: theme('colors.warning.DEFAULT');
+    --color-warning-600: theme('colors.warning.600');
+    --color-warning-700: theme('colors.warning.700');
+    --color-warning-800: theme('colors.warning.800');
+    --color-warning-900: theme('colors.warning.900');
+    --color-warning-950: theme('colors.warning.950');
+
+    /* Color Palette - Error */
+    --color-error-50: theme('colors.error.50');
+    --color-error-100: theme('colors.error.100');
+    --color-error-200: theme('colors.error.200');
+    --color-error-300: theme('colors.error.300');
+    --color-error-400: theme('colors.error.400');
+    --color-error-500: theme('colors.error.DEFAULT');
+    --color-error-600: theme('colors.error.600');
+    --color-error-700: theme('colors.error.700');
+    --color-error-800: theme('colors.error.800');
+    --color-error-900: theme('colors.error.900');
+    --color-error-950: theme('colors.error.950');
+
+    /* Semantic Tokens - Backgrounds */
+    --bg-page: #f3f6fb;
+    --bg-surface: theme('colors.white');
+    --bg-card: theme('colors.white');
+    --bg-input: var(--color-secondary-50);
+    --bg-input-focus: theme('colors.white');
+    --bg-overlay: rgba(255, 255, 255, 0.9);
+    
+    /* Semantic Tokens - Text */
+    --text-primary: var(--color-secondary-900);
+    --text-secondary: var(--color-secondary-600);
+    --text-muted: var(--color-secondary-500);
+    --text-hint: var(--color-secondary-400);
+    --text-label: var(--color-secondary-700);
+    --text-on-primary: var(--color-primary-50);
+    --text-inverse: theme('colors.white');
+    --text-error: var(--color-error-500);
+    
+    /* Semantic Tokens - Borders */
+    --border-default: var(--color-secondary-200);
+    --border-subtle: var(--color-secondary-200);
+    --border-focus: var(--color-primary-400);
+    --border-dashed: var(--color-secondary-300);
+    
+    /* Shadows */
+    --shadow-card: theme('boxShadow.card');
+    --shadow-card-active: theme('boxShadow.card-active');
+    --shadow-float: theme('boxShadow.float');
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    
+    /* Border Radius */
+    --radius-card: theme('borderRadius.card');
+    --radius-box: theme('borderRadius.box');
+    --radius-full: 9999px;
+  }
+}
+
+/* Component Classes */
+@layer components {
+  /* Card Components */
+  .card-surface {
+    @apply rounded-card bg-white px-3.5 py-3 shadow-card;
+  }
+
+  .card-hero {
+    @apply relative overflow-hidden rounded-[26px] bg-gradient-to-br from-primary-600 via-primary-500 to-primary-400 px-4 pt-4 pb-4 text-primary-50 shadow-sm;
+  }
+
+  .card-modal {
+    @apply relative w-full rounded-t-3xl bg-white px-5 pt-4 pb-5 shadow-lg;
+  }
+
+  .card-summary {
+    @apply space-y-2 rounded-2xl border border-secondary-200 bg-secondary-50 p-3 text-left text-sm text-secondary-800;
+  }
+
+  .card-item {
+    @apply rounded-2xl bg-secondary-50 px-3 py-1.5;
+  }
+
+  /* Input Components */
+  .input-field {
+    @apply w-full rounded-2xl border border-secondary-200 bg-secondary-50 px-3 py-2 text-[13px] outline-none ring-0;
+    @apply focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100;
+  }
+
+  .input-search {
+    @apply w-full rounded-2xl border border-primary-100 bg-white/90 py-2 text-sm text-secondary-800 shadow-sm outline-none ring-0;
+    @apply placeholder:text-secondary-400;
+    @apply focus:border-primary-400 focus:bg-white focus:shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus:ring-2 focus:ring-primary-200;
+  }
+
+  .textarea-field {
+    @apply w-full resize-none rounded-2xl border border-secondary-200 bg-secondary-50 px-3 py-2 text-[13px] leading-snug outline-none ring-0;
+    @apply focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100;
+  }
+
+  /* Button Components */
+  .btn-primary {
+    @apply flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-primary-50;
+    @apply shadow-[0_10px_26px_rgba(5,150,105,0.45)] transition active:scale-[0.98];
+    @apply disabled:cursor-not-allowed disabled:bg-primary-300 disabled:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply min-h-[44px] flex-1 rounded-full border border-secondary-300 bg-white px-3 py-2 text-sm font-semibold text-secondary-700;
+    @apply hover:bg-secondary-50 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-confirm {
+    @apply min-h-[44px] flex-1 rounded-full bg-primary-500 px-3 py-2 text-sm font-semibold text-white shadow-sm;
+    @apply hover:bg-primary-600 active:scale-95 disabled:cursor-not-allowed disabled:bg-secondary-300;
+  }
+
+  .btn-filter {
+    @apply flex items-center gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur transition active:scale-[0.98] border-2 border-white/70;
+  }
+
+  .btn-upload {
+    @apply flex cursor-pointer items-center justify-between gap-2 rounded-2xl border border-dashed border-secondary-300 bg-secondary-50 px-3 py-2 text-[12px] text-secondary-600;
+    @apply hover:border-primary-400 hover:bg-primary-50/40;
+  }
+
+  /* Badge Components */
+  .badge-primary {
+    @apply inline-flex items-center justify-center rounded-full border border-primary-100 bg-primary-50 px-1.5 py-[1px] text-[11px] font-medium text-primary-700;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium bg-warning-50 text-warning-700;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium bg-primary-50 text-primary-700;
+  }
+
+  .badge-error {
+    @apply inline-flex items-center gap-1 rounded-xl bg-error-50 px-3 py-1.5 text-xs text-error-600;
+  }
+
+  .badge-info {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium bg-info-50 text-info-700;
+  }
+
+  .badge-step {
+    @apply inline-flex items-center justify-center h-3.5 px-1.5 rounded-full bg-primary-500 text-[10px] font-semibold text-white;
+  }
+
+  /* Text Styles */
+  .text-label {
+    @apply text-[15px] font-semibold text-secondary-700;
+  }
+
+  .text-hint {
+    @apply text-xs text-secondary-400;
+  }
+
+  .text-body {
+    @apply text-sm text-secondary-600;
+  }
+
+  .text-heading {
+    @apply text-[15px] font-semibold text-secondary-900;
+  }
+
+  .text-hero-title {
+    @apply mt-1 text-[20px] font-bold leading-snug;
+  }
+
+  .text-hero-subtitle {
+    @apply text-[12px] leading-relaxed text-primary-50/95;
+  }
+
+  .text-hero-caption {
+    @apply text-[11px] text-primary-50/80;
+  }
+
+  /* Link Components */
+  .link-primary {
+    @apply text-xs font-medium text-primary-600 underline;
+  }
+
+  .link-error {
+    @apply text-[10px] text-error-500 underline;
+  }
+
+  /* Icon Containers */
+  .icon-container {
+    @apply flex h-10 w-10 items-center justify-center rounded-xl border border-secondary-200 bg-secondary-50;
+  }
+
+  /* Task Card */
+  .task-card {
+    @apply relative grid grid-cols-[1fr,auto] items-stretch gap-2.5 rounded-card bg-white px-3.5 py-3 text-inherit shadow-card no-underline;
+    @apply transition-transform transition-shadow active:scale-[0.985] active:shadow-card-active;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  /* Background Utilities */
+  .bg-page {
+    background-color: var(--bg-page);
+  }
+
+  .bg-card {
+    background-color: var(--bg-card);
+  }
+
+  .bg-overlay {
+    background-color: var(--bg-overlay);
+  }
+
+  /* Text Utilities */
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+  }
+
+  .text-hint {
+    color: var(--text-hint);
+  }
+
+  .text-label {
+    color: var(--text-label);
+  }
+
+  .text-error {
+    color: var(--text-error);
+  }
+
+  /* Border Utilities */
+  .border-default {
+    border-color: var(--border-default);
+  }
+
+  .border-subtle {
+    border-color: var(--border-subtle);
+  }
+
+  .border-focus {
+    border-color: var(--border-focus);
+  }
+
+  .border-dashed {
+    border-color: var(--border-dashed);
+  }
+}
