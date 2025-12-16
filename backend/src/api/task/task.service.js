@@ -509,12 +509,13 @@ async function processJobScoringWorkflow({ data }) {
 }
 
 async function taskComment({ jobNo, custSeq }) {
-  const parseMedia = (ssdtImage) =>
+  const parseMedia = (ssdtImage, baseId) =>
     (ssdtImage ?? "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean)
-      .map((name) => ({
+      .map((name, idx) => ({
+        id: `${baseId}-media-${idx}`,
         type: [".jpg", ".jpeg", ".png"].some((ext) =>
           name.toLowerCase().endsWith(ext)
         )
@@ -523,8 +524,8 @@ async function taskComment({ jobNo, custSeq }) {
         url: `http://localhost:3001/media_comments/${name}`,
       }));
 
-  const resolveUserCode = async (conn, row) => {
-    // ถ้าเป็น username ให้ lookup หา userCode/custSeq
+  const resolveRole = async (conn, row) => {
+    // ถ้าเป็น username = customer
     if (row.SSDT_USERNAME) {
       const { rows: userRows } =
         await taskModel.findUsernameByCustCodeAndCustSeq({
@@ -534,31 +535,40 @@ async function taskComment({ jobNo, custSeq }) {
 
       const user = userRows?.[0];
       return {
+        role: "customer",
         userCode: user?.USERCODE,
         custSeq: user?.CUSTSEQ,
       };
     }
 
-    // ถ้าไม่มี username ใช้ empcode
-    return { userCode: row.SSDT_EMPCODE };
+    // ถ้าไม่มี username = operator (employee)
+    return { 
+      role: "operator",
+      userCode: row.SSDT_EMPCODE 
+    };
   };
 
   return withTransaction(async (conn) => {
     const { rows } = await taskModel.getTaskComment({ conn, jobNo, custSeq });
 
     const data = [];
-    for (const row of rows) {
-      const [imageUrls, isUserCode] = await Promise.all([
-        Promise.resolve(parseMedia(row.SSDT_IMAGE)),
-        resolveUserCode(conn, row),
-      ]);
+    for (const [index, row] of rows.entries()) {
+      const roleInfo = await resolveRole(conn, row);
+      const commentId = `${jobNo}-comment-${index + 1}`;
 
       data.push({
-        comment: row.SSDT_DET,
-        date: row.DATE_COMMENT,
-        operator: row.NAME_X,
-        isUserCode, // ใช้ตรวจสอบว่าเป็นความคิดเห็นของผู้ใช้หรือไม่ ในหน้า frontend
-        imageUrls,
+        id: commentId,
+        taskId: jobNo,
+        author: row.NAME_X,
+        role: roleInfo.role,
+        createdAt: row.DATE_COMMENT,
+        message: row.SSDT_DET,
+        media: parseMedia(row.SSDT_IMAGE, commentId),
+        // เก็บข้อมูลเพิ่มเติมสำหรับตรวจสอบว่าเป็นของใครในหน้า frontend
+        _userInfo: {
+          userCode: roleInfo.userCode,
+          custSeq: roleInfo.custSeq,
+        },
       });
     }
 
@@ -572,15 +582,16 @@ async function saveTaskComment({ data, userType }) {
 
   const IMAGE_EXTS = [".jpg", ".jpeg", ".png"];
 
-  const parseMedia = (names) =>
+  const parseMedia = (names, baseId) =>
     (names ?? "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean)
-      .map((name) => {
+      .map((name, idx) => {
         const lower = name.toLowerCase();
         const isImage = IMAGE_EXTS.some((ext) => lower.endsWith(ext));
         return {
+          id: `${baseId}-media-${idx}`,
           type: isImage ? "image" : "video",
           url: `http://localhost:3001/media_comments/${name}`,
         };
@@ -637,13 +648,22 @@ async function saveTaskComment({ data, userType }) {
     });
     const operator = nameRows?.[0]?.NAME_X ?? "";
 
-    // 4) prepare response
+    // 4) สร้าง comment id ใหม่
+    const commentId = `${jobNo}-comment-${Date.now()}`;
+
+    // 5) prepare response ในรูปแบบที่ตรงกับ TaskComment interface
     return {
-      comment: det,
-      date: new Date(),
-      operator,
-      isUserCode: isCustomer ? { userCode, custSeq } : { userCode },
-      imageUrls: parseMedia(imageNames),
+      id: commentId,
+      taskId: jobNo,
+      author: operator,
+      role: isCustomer ? "customer" : "operator",
+      createdAt: new Date().toISOString(),
+      message: det,
+      media: parseMedia(imageNames, commentId),
+      // เก็บข้อมูลเพิ่มเติมสำหรับตรวจสอบว่าเป็นของใครในหน้า frontend
+      _userInfo: isCustomer 
+        ? { userCode, custSeq } 
+        : { userCode },
     };
   });
 }

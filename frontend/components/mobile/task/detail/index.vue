@@ -63,6 +63,11 @@
       </section>
 
       <TaskTimeLine v-else :status="task.status" :currentStep="task.currentStep ?? 0" :timeline="task.timeline ?? []" />
+
+      <!-- Comment Section -->
+      <section v-if="task.id" class="mt-6">
+        <TaskCommentMobile :taskId="task.ticket" :jobNo="task.id" />
+      </section>
     </main>
     <ResponsiveModal :model-value="previewOpen" @update:model-value="previewOpen = false">
       <MediaPreview :previewMedia="previewMedia" @close="previewOpen = false" />
@@ -101,6 +106,7 @@ import { ArrowLeft } from "lucide-vue-next";
 import TaskDetailHeader from "./TaskDetailHeader.vue";
 import TaskMedia from "./TaskMedia.vue";
 import TaskTimeLine from "./TaskTimeLine.vue";
+import TaskCommentMobile from "../TaskCommentMobile.vue";
 import TaskSummaryCard from "../../employee/task/TaskSummaryCard.vue";
 import TaskSatisfactionCard from "../../customer/task/TaskSatisfactionCard.vue";
 import type { TaskDetail, PreviewMedia } from "@/types/task";

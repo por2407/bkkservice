@@ -66,6 +66,11 @@
                             </span>
                         </div>
                     </section>
+
+                    <!-- Comment Section -->
+                    <section v-if="task.id" class="h-[600px]">
+                        <TaskCommentWeb :taskId="task.ticket" :jobNo="task.id" />
+                    </section>
                 </div>
 
                 <!-- Right Column: Timeline -->
@@ -116,6 +121,7 @@ import { ArrowLeft } from "lucide-vue-next";
 import TaskDetailHeader from "@/components/web/task/detail/TaskDetailHeader.vue";
 import TaskMedia from "@/components/web/task/detail/TaskMedia.vue";
 import TaskTimeLine from "@/components/web/task/detail/TaskTimeLine.vue";
+import TaskCommentWeb from "@/components/web/task/TaskCommentWeb.vue";
 import TaskSummaryCard from "@/components/web/employee/task/TaskSummaryCard.vue";
 import TaskSatisfactionCard from "@/components/web/customer/task/TaskSatisfactionCard.vue";
 import MediaPreview from "@/components/web/task/detail/MediaPreview.vue";

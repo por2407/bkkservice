@@ -1,4 +1,4 @@
-import type { PayLoadActive, PayLoadActiveFinish, PayLoadRate, RateResult } from "@/types/task";
+import type { PayLoadActive, PayLoadActiveFinish, PayLoadRate, RateResult, SaveCommentInput, TaskComment } from "@/types/task";
 import { useBuildPayload } from "@/composables/useBuildPayload";
 import axios, { type AxiosProgressEvent } from "axios";
 
@@ -121,5 +121,51 @@ export const taskApi = {
       method: "post",
       body: useBuildPayload({ ...data }),
     });
+  },
+
+  /**
+   * ดึงข้อมูล comments ของ task
+   */
+  async getComments(jobNo: string) {
+    const config = useRuntimeConfig();
+    return await $fetch<TaskComment[]>(`/api/tasks/task-comment`, {
+      baseURL: config.public.apiBase,
+      method: "get",
+      query: useBuildPayload({ jobNo }),
+    });
+  },
+
+  /**
+   * บันทึก comment ใหม่ พร้อมอัปโหลดรูปภาพ/วิดีโอ
+   */
+  async saveComment(
+    data: SaveCommentInput,
+    files: File[],
+    onUploadProgress?: (e: AxiosProgressEvent) => void
+  ) {
+    const config = useRuntimeConfig();
+    const payload = useBuildPayload(data);
+
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    files.forEach((file) => {
+      formData.append("image", file);
+    });
+
+    return await axios.post(
+      `${config.public.apiBase}/api/tasks/save-task-comment`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress,
+      }
+    );
   },
 };

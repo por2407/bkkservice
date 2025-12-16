@@ -62,11 +62,11 @@ interface TimelineStep {
 
 /* ---------- comment types ---------- */
 
-interface CommentMedia extends TaskMedia {
+export interface CommentMedia extends TaskMedia {
   id: string;
 }
 
-interface TaskComment {
+export interface TaskComment {
   id: string;
   taskId: string;
   author: string;
@@ -74,6 +74,13 @@ interface TaskComment {
   createdAt: string;
   message: string;
   media: CommentMedia[];
+}
+
+export interface SaveCommentInput {
+  jobNo: string;
+  det: string;
+  typeCode?: string;
+  typeSeq?: string;
 }
 
 export interface RatingItem {
