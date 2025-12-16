@@ -1,4 +1,4 @@
-import type { PayLoadActive, PayLoadActiveFinish } from "@/types/task";
+import type { PayLoadActive, PayLoadActiveFinish, PayLoadRate, RateResult } from "@/types/task";
 import { useBuildPayload } from "@/composables/useBuildPayload";
 import axios, { type AxiosProgressEvent } from "axios";
 
@@ -111,5 +111,15 @@ export const taskApi = {
         body: useBuildPayload({ ...data }),
       }
     );
+  },
+
+  async rateTask(data = {} as PayLoadRate) {
+    const config = useRuntimeConfig();
+    await new Promise((r) => setTimeout(r, 200));
+    return await $fetch<RateResult>(`/api/tasks/process-job-scoring-workflow`, {
+      baseURL: config.public.apiBase,
+      method: "post",
+      body: useBuildPayload({ ...data }),
+    });
   },
 };

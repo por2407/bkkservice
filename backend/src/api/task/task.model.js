@@ -6,6 +6,12 @@ export const taskModel = {
     nextRefTask,
     createNewTask,
     findDescriptionTaskScore,
+    updateTaskScore,
+    getStartEndDatesByJobNo,
+    getWeekDiffFromThaiStartDate,
+    getNumSdayByJobNoAndWeekDiff,
+    insertJobServiceDetailScore,
+    insertCustomerPointTransaction,
   },
   employee: {
     findEmployeeInprogress,
@@ -21,6 +27,12 @@ export const taskModel = {
   findDetail,
   timeLine,
   getPartialInfo,
+  getTaskComment,
+  getRefNoComment,
+  findUserName,
+  insertTaskComment,
+  findNameComment,
+  findUsernameByCustCodeAndCustSeq,
 };
 
 async function findCustomerInprogress({ conn, userCode, custSeq }) {
@@ -281,7 +293,7 @@ async function findDetail({ conn, tarNo, type }) {
        ELSE 1
     END AS CANRATING, 
     t.BTDST_SCORE, 
-    ${cols} from SV_TARM_T s ${joins} join BK_TARDS_T t on t.BTDST_NO = s.STT_JOBNO where s.STT_TAR_NO =:tarNo`,
+    ${cols} from SV_TARM_T s ${joins} left join BK_TARDS_T t on t.BTDST_NO = s.STT_JOBNO where s.STT_TAR_NO =:tarNo`,
     { tarNo }
   );
 }
@@ -519,9 +531,9 @@ async function getStartEndDatesByJobNo({ conn, jobNo }) {
     `
     select to_char(BTMT_DATE,'dd/mm/yyyy hh24:mi','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI') as DATE_ST,
        to_char(BTMT_WORK_DATE_ED,'dd/mm/yyyy hh24:mi','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI') as DATE_ED, 
-       to_char(BTMT_DATE,'dd/mm/yyyy','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI') as DATEST_TH,
-       to_char(BTMT_WORK_DATE_ED,'dd/mm/yyyy','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI') as DATEED_TH  
-    from BK_TARM_T where BTMT_NO = :jobNo
+       to_char(BTMT_DATE,'dd/mm/yyyy','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI') as DATE_ST_TH,
+       to_char(BTMT_WORK_DATE_ED,'dd/mm/yyyy','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI') as DATE_ED_TH  
+    from co.BK_TARM_T where BTMT_NO = :jobNo
     `,
     { jobNo }
   );
@@ -545,7 +557,7 @@ async function getNumSdayByJobNoAndWeekDiff({ conn, sDay, jobNo }) {
     `
       select 
           (trunc(sysdate) - trunc(BTMT_DATE) ) - :sDay as NUMSDAY  
-      from BK_TARM_T where BTMT_NO = :jobNo
+      from co.BK_TARM_T where BTMT_NO = :jobNo
     `,
     { sDay, jobNo }
   );
@@ -573,14 +585,15 @@ async function insertCustomerPointTransaction({ conn, payload }) {
     SPT_JOB_NO,
     SPT_DATE_ST,
     SPT_DATE_ED,
-    SPT_POINT)
+    SPT_POINT,
+    SPT_INSERT_DATE)
 		values(
     :userCode,
     :custSeq,
     :jobNo,
     to_date(:dateSt,'dd/mm/yyyy','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI'),
-    to_date(:dateed,'dd/mm/yyyy','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI'),
-    :vPoint)
+    to_date(:dateEd,'dd/mm/yyyy','NLS_CALENDAR=''THAI BUDDHA''NLS_DATE_LANGUAGE=THAI'),
+    :vPoint, sysdate)
     `,
     {
       userCode,
@@ -591,5 +604,118 @@ async function insertCustomerPointTransaction({ conn, payload }) {
       vPoint,
     },
     { autoCommit: false }
+  );
+}
+
+async function updateTaskScore({ conn, jobNo, star }) {
+  return conn.execute(
+    `
+  UPDATE BK_TARDS_T SET BTDST_SCORE =:star WHERE BTDST_NO =:jobNo
+    `,
+    { jobNo, star },
+    { autoCommit: false }
+  );
+}
+
+async function getTaskComment({ conn, jobNo, custSeq }) {
+  return conn.execute(
+    `
+    SELECT
+      t.SSDT_DATE AS DATE_COMMENT,
+      t.SSDT_DET,
+      t.SSDT_USERNAME,
+      t.SSDT_EMPCODE,
+      t.SSDT_IMAGE,
+      CASE
+        WHEN t.SSDT_EMPCODE IS NOT NULL THEN getdemp(t.SSDT_EMPCODE, 'N')
+        WHEN t.SSDT_USERNAME IS NOT NULL THEN getcustdpmnx(u.SUR_CUSTCODE, :custSeq)
+        ELSE NULL
+      END AS NAME_X
+    FROM SV_SERVICED_T t
+    LEFT JOIN SV_USER_R u
+      ON u.SUR_USERNAME = t.SSDT_USERNAME
+     AND u.SUR_CUSTSEQ  = :custSeq
+    WHERE t.SSDT_JOB_NO   = :jobNo
+    ORDER BY t.SSDT_DATE DESC
+    `,
+    { jobNo, custSeq }
+  );
+}
+
+async function findUsernameByCustCodeAndCustSeq({ conn, userName }) {
+  return conn.execute(
+    `
+   SELECT SUR_CUSTCODE as USERCODE, SUR_CUSTSEQ as CUSTSEQ
+    FROM SV_USER_R
+    WHERE SUR_USERNAME =:userName
+   `,
+    { userName }
+  );
+}
+
+async function getRefNoComment({ conn, jobNo }) {
+  return conn.execute(
+    `
+    SELECT NVL(
+         MAX(
+           CASE
+             WHEN REGEXP_LIKE(REGEXP_SUBSTR(SSDT_IMAGE, '_([0-9]+)\.[^.]+$', 1, 1, NULL, 1), '^[0-9]+$')
+             THEN TO_NUMBER(REGEXP_SUBSTR(SSDT_IMAGE, '_([0-9]+)\.[^.]+$', 1, 1, NULL, 1))
+           END
+         ), 0
+       ) + 1 AS SUB
+    FROM SV_SERVICED_T
+    WHERE SSDT_JOB_NO = :jobNo
+  `,
+    { jobNo }
+  );
+}
+
+async function findUserName({ conn, userCode, custSeq }) {
+  return conn.execute(
+    `
+   SELECT SUR_USERNAME as USERNAME 
+   FROM SV_USER_R 
+   WHERE SUR_CUSTCODE =:userCode 
+      AND SUR_CUSTSEQ =:custSeq
+    `,
+    { userCode, custSeq }
+  );
+}
+
+async function insertTaskComment({ conn, payload, type }) {
+  const { jobNo, typeCode, typeSeq, det, empCode, userName, imageNames } =
+    payload;
+
+  const cols = type ? `, SSDT_USERNAME` : ` , SSDT_EMPCODE `;
+  const vals = type ? `, :userName` : `, :empCode `;
+  return conn.execute(
+    `
+    INSERT INTO SV_SERVICED_T 
+    (SSDT_JOB_NO, SSDT_TYPE_CODE, SSDT_TYPE_SEQ, SSDT_DET, SSDT_DATE, SSDT_IMAGE ${cols}) 
+    VALUES (:jobNo, :typeCode, :typeSeq, :det, sysdate, :imageNames ${vals})
+    `,
+    {
+      jobNo,
+      typeCode,
+      typeSeq,
+      det,
+      ...(type ? { userName } : { empCode }),
+      imageNames,
+    },
+    { autoCommit: false }
+  );
+}
+
+async function findNameComment({ conn, userCode, custSeq, type }) {
+  const cols = type
+    ? ` getcustdpmnx(:userCode, :custSeq) `
+    : ` getdemp(:userCode, 'N') `;
+
+  return conn.execute(
+    `
+   SELECT ${cols} as NAME_X FROM dual
+    `,
+    { userCode, ...(type ? { custSeq } : {}) }
   );
 }

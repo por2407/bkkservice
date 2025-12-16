@@ -1,0 +1,21 @@
+meta {
+  name: save-task-comment
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:3001/api/tasks/task-comment?jobNo=T66090001&custSeq=32
+  body: none
+  auth: inherit
+}
+
+params:query {
+  jobNo: T66090001
+  custSeq: 32
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

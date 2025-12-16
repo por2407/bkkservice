@@ -98,3 +98,17 @@ export interface PayLoadActiveFinish extends PayLoadActive {
   process: string;
   pending: string;
 }
+
+export interface PayLoadRate {
+  jobNo: string;
+  scoreList: { id: string; score: number }[];
+}
+
+export interface RateResult {
+  data: {
+    star: number;
+    dateed: string;
+    datest: string;
+    vPoint: number;
+  };
+}

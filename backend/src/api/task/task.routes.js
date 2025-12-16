@@ -1,7 +1,7 @@
 import { Router } from "express";
 export const taskRouter = Router();
 import { taskService } from "./task.service.js";
-import { uploadImage } from "./task.storage.js";
+import { uploadImage, uploadCommentImage } from "./task.storage.js";
 import { getTarNo } from "../../shared/middleware/getTarNo.js";
 
 taskRouter
@@ -108,4 +108,31 @@ taskRouter
     } catch (e) {
       next(e);
     }
-  });
+  })
+  .get("/task-comment", async (req, res, next) => {
+    try {
+      const { jobNo, custSeq } = req.query;
+      const result = await taskService.taskComment({ jobNo, custSeq });
+      return res.status(200).json(result);
+    } catch (e) {
+      next(e);
+    }
+  })
+  .post(
+    "/save-task-comment",
+    uploadCommentImage.array("image"),
+    async (req, res, next) => {
+      try {
+        const files = req.files || [];
+        const imageNames =
+          files.length > 0 ? files.map((f) => f.filename).join(",") : null;
+        const result = await taskService.saveTaskComment({
+          data: { ...req.body, imageNames },
+          userType: req.body.userType,
+        });
+        return res.status(200).json(result);
+      } catch (e) {
+        next(e);
+      }
+    }
+  );

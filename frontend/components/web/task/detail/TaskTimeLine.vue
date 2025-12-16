@@ -25,7 +25,7 @@
             <Check class="h-2.5 w-2.5 text-[var(--text-inverse)]" />
           </div>
 
-          <div v-if="step.step === currentStep"
+          <div v-if="step.step === currentStep && status === 'in_progress'"
             class="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-info-500)] shadow-sm">
             <Hourglass class="h-2.5 w-2.5 text-[var(--text-inverse)]" />
           </div>

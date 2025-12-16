@@ -1,0 +1,22 @@
+meta {
+  name: detail
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:3001/api/tasks/detail?tarNo=BS68120003&userCode=00005&custSeq=27&userType=c 
+  body: none
+  auth: inherit
+}
+
+params:query {
+  tarNo: BS68120003
+  userCode: 00005
+  custSeq: 27
+  userType: c 
+}
+
+settings {
+  encodeUrl: true
+}

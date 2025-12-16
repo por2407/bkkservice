@@ -117,51 +117,50 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
-/* วงกลม progress: ใช้สีส้มเดิม */
 .progress-ring {
---size: 56px;
---thickness: 2px;
---value: 0%;
+  --size: 64px;
+  --thickness: 3px;
+  --value: 0%;
 
-position: relative;
-width: var(--size);
-height: var(--size);
-display: flex;
-align-items: center;
-justify-content: center;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .progress-ring::before {
-content: "";
-position: absolute;
-inset: 0;
-border-radius: 9999px;
-background: conic-gradient(#ff3d00 var(--value), transparent 0),
-conic-gradient(#e5e7eb 0 360deg);
-transform: rotate(-90deg);
--webkit-mask: radial-gradient(farthest-side,
-transparent calc(50% - var(--thickness)),
-#000 calc(50% - var(--thickness) + 1px));
-mask: radial-gradient(farthest-side,
-transparent calc(50% - var(--thickness)),
-#000 calc(50% - var(--thickness) + 1px));
-box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-transition: background 0.15s linear;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: conic-gradient(var(--color-error-500) var(--value), transparent 0),
+    conic-gradient(var(--color-secondary-200) 0 360deg);
+  transform: rotate(-90deg);
+  -webkit-mask: radial-gradient(farthest-side,
+      transparent calc(50% - var(--thickness)),
+      #000 calc(50% - var(--thickness) + 1px));
+  mask: radial-gradient(farthest-side,
+      transparent calc(50% - var(--thickness)),
+      #000 calc(50% - var(--thickness) + 1px));
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+  transition: background 0.15s linear;
 }
 
 .progress-ring__label {
-position: relative;
-display: flex;
-align-items: center;
-justify-center: center;
-width: calc(var(--size) - var(--thickness) * 6);
-height: calc(var(--size) - var(--thickness) * 6);
-border-radius: 9999px;
-background: #ffffff;
-font-size: 11px;
-font-weight: 600;
-color: #ff3d00;
-box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08),
-0 0 0 1px rgba(148, 163, 184, 0.25);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--size) - var(--thickness) * 6);
+  height: calc(var(--size) - var(--thickness) * 6);
+  border-radius: 9999px;
+  background: var(--bg-surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-error-500);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08),
+    0 0 0 1px var(--border-subtle);
 }
 </style>

@@ -5,15 +5,46 @@ meta {
 }
 
 post {
-  url: http//:localhost:3001/api/taks/process-job-scoring-workflow
-  body: none
+  url: http://localhost:3001/api/tasks/process-job-scoring-workflow
+  body: json
   auth: inherit
 }
 
-params:path {
-  localhost:3001: 
+body:json {
+  {
+    "jobNo" : "T68120001", 
+    "userCode" : "00005", 
+    "custSeq" : 27, 
+    "scoreList" : [
+    {
+      "id": "1",
+      "score": 3
+    },
+    {
+      "id": "2",
+      "score": 4
+    },
+    {
+      "id": "3",
+      "score": 4
+    },
+    {
+      "id": "4",
+      "score": 4
+    },
+    {
+      "id": "5",
+      "score": 4
+    },
+    {
+      "id": "6",
+      "score": 3
+    }
+  ]
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

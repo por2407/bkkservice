@@ -16,7 +16,7 @@ export function useAuth() {
         data = {
           userCode: "00005",
           custSeq: "27",
-          appType: "a",
+          appType: "w",
           userType: "c",
           name: "กันยา",
           school: "โรงเรียนรัตนโกสินทร์",

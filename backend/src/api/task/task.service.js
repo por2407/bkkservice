@@ -11,6 +11,8 @@ export const taskService = {
   getTaskStartDate,
   taskUpdateService,
   processJobScoringWorkflow,
+  taskComment,
+  saveTaskComment,
 };
 
 const LIST_TASK_BY_TYPE = {
@@ -397,61 +399,251 @@ async function processJobScoringWorkflow({ data }) {
   return withTransaction(async (conn) => {
     let sumscore = 0;
     let star = 0;
-    // const { rows } = await taskModel.customer.getStartEndDatesByJobNo({
-    //   conn,
-    //   jobNo,
-    // });
-    // const { rows: weekDiff } =
-    //   await taskModel.customer.getWeekDiffFromThaiStartDate({
-    //     conn,
-    //     dateStTh: rows?.[0]?.DATEST_TH,
-    //   });
+    const { rows } = await taskModel.customer.getStartEndDatesByJobNo({
+      conn,
+      jobNo,
+    });
+    const { rows: weekDiff } =
+      await taskModel.customer.getWeekDiffFromThaiStartDate({
+        conn,
+        dateStTh: rows?.[0]?.DATE_ST_TH,
+      });
 
-    // const sDay = Math.max(Number(weekDiff?.[0]?.SDAY) ?? 0, 0);
+    const sDay = Math.max(Number(weekDiff?.[0]?.SDAY) ?? 0, 0);
 
-    // const { rows: numSday } =
-    //   await taskModel.customer.getNumSdayByJobNoAndWeekDiff({
-    //     conn,
-    //     jobNo,
-    //     sDay,
-    //   });
-    // const numday = numSday?.[0]?.NUMSDAY;
+    const { rows: numSday } =
+      await taskModel.customer.getNumSdayByJobNoAndWeekDiff({
+        conn,
+        jobNo,
+        sDay,
+      });
+    const numday = numSday?.[0]?.NUMSDAY;
 
-    // let vpoint = 1;
+    let vPoint = 1;
 
-    // if (numday <= 6) {
-    //   vpoint = 6;
-    // }
-    // if (numday == 7) {
-    //   vpoint = 5;
-    // }
-    // if (numday == 8) {
-    //   vpoint = 4;
-    // }
-    // if (numday == 9) {
-    //   vpoint = 3;
-    // }
-    // if (numday == 10) {
-    //   vpoint = 2;
-    // }
-    // if (numday == 11) {
-    //   vpoint = 1;
-    // }
+    if (numday <= 6) {
+      vPoint = 6;
+    }
+    if (numday == 7) {
+      vPoint = 5;
+    }
+    if (numday == 8) {
+      vPoint = 4;
+    }
+    if (numday == 9) {
+      vPoint = 3;
+    }
+    if (numday == 10) {
+      vPoint = 2;
+    }
+    if (numday == 11) {
+      vPoint = 1;
+    }
+    let isErr;
+    for (const [index, score] of scoreList.entries()) {
+      const { rowsAffected } =
+        await taskModel.customer.insertJobServiceDetailScore({
+          conn,
+          payload: {
+            jobNo,
+            vCode: score.id,
+            i: index + 1,
+            vScore: score.score,
+          },
+        });
 
-    // await taskModel.customer.insertJobServiceDetailScore({conn, payload:{jobNo, vCode: index, i:index, vScore:score}})
-
-    for (const score of scoreList) {
+      if (!rowsAffected || rowsAffected === 0) {
+        isErr = true;
+        break;
+      }
       sumscore += Number(score.score);
+    }
+    if (isErr) {
+      throw new AppErrors({
+        message: "บันทึกคะแนนการให้บริการไม่สำเร็จ",
+        httpStatus: 500,
+      });
+    }
+
+    star = Math.round(sumscore / scoreList.length);
+
+    const { rowsAffected: pointRowsAffected } =
+      await taskModel.customer.insertCustomerPointTransaction({
+        conn,
+        payload: {
+          userCode,
+          custSeq,
+          jobNo,
+          dateSt: rows?.[0]?.DATE_ST_TH,
+          dateEd: rows?.[0]?.DATE_ED_TH,
+          vPoint,
+        },
+      });
+
+    if (!pointRowsAffected || pointRowsAffected === 0) {
+      throw new AppErrors({
+        message: "บันทึกคะแนนสะสมไม่สำเร็จ",
+        httpStatus: 500,
+      });
+    }
+
+    const { rowsAffected: updateRowsAffected } =
+      await taskModel.customer.updateTaskScore({ conn, jobNo, star });
+
+    if (!updateRowsAffected || updateRowsAffected === 0) {
+      throw new AppErrors({
+        message: "อัปเดตคะแนนการให้บริการไม่สำเร็จ",
+        httpStatus: 500,
+      });
     }
 
     return {
       data: {
-        jobNo,
+        star,
+        datest: rows?.[0]?.DATE_ST,
+        dateed: rows?.[0]?.DATE_ED,
+        vPoint,
+      },
+    };
+  });
+}
+
+async function taskComment({ jobNo, custSeq }) {
+  const parseMedia = (ssdtImage) =>
+    (ssdtImage ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((name) => ({
+        type: [".jpg", ".jpeg", ".png"].some((ext) =>
+          name.toLowerCase().endsWith(ext)
+        )
+          ? "image"
+          : "video",
+        url: `http://localhost:3001/media_comments/${name}`,
+      }));
+
+  const resolveUserCode = async (conn, row) => {
+    // ถ้าเป็น username ให้ lookup หา userCode/custSeq
+    if (row.SSDT_USERNAME) {
+      const { rows: userRows } =
+        await taskModel.findUsernameByCustCodeAndCustSeq({
+          conn,
+          userName: row.SSDT_USERNAME,
+        });
+
+      const user = userRows?.[0];
+      return {
+        userCode: user?.USERCODE,
+        custSeq: user?.CUSTSEQ,
+      };
+    }
+
+    // ถ้าไม่มี username ใช้ empcode
+    return { userCode: row.SSDT_EMPCODE };
+  };
+
+  return withTransaction(async (conn) => {
+    const { rows } = await taskModel.getTaskComment({ conn, jobNo, custSeq });
+
+    const data = [];
+    for (const row of rows) {
+      const [imageUrls, isUserCode] = await Promise.all([
+        Promise.resolve(parseMedia(row.SSDT_IMAGE)),
+        resolveUserCode(conn, row),
+      ]);
+
+      data.push({
+        comment: row.SSDT_DET,
+        date: row.DATE_COMMENT,
+        operator: row.NAME_X,
+        isUserCode, // ใช้ตรวจสอบว่าเป็นความคิดเห็นของผู้ใช้หรือไม่ ในหน้า frontend
+        imageUrls,
+      });
+    }
+
+    return data;
+  });
+}
+
+async function saveTaskComment({ data, userType }) {
+  const isCustomer = userType !== "e"; // true = ลูกค้า, false = พนักงาน
+  const { jobNo, userCode, custSeq, det, imageNames, typeCode, typeSeq } = data;
+
+  const IMAGE_EXTS = [".jpg", ".jpeg", ".png"];
+
+  const parseMedia = (names) =>
+    (names ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((name) => {
+        const lower = name.toLowerCase();
+        const isImage = IMAGE_EXTS.some((ext) => lower.endsWith(ext));
+        return {
+          type: isImage ? "image" : "video",
+          url: `http://localhost:3001/media_comments/${name}`,
+        };
+      });
+
+  return withTransaction(async (conn) => {
+    // 1) หา username (เฉพาะลูกค้า)
+    let userName;
+    if (isCustomer) {
+      const { rows } = await taskModel.findUserName({
+        conn,
         userCode,
         custSeq,
-        scoreList,
-        sumscore,
-      },
+      });
+      const user = rows?.[0];
+      if (!user) {
+        throw new AppErrors({
+          message: "ไม่พบข้อมูลผู้ใช้งาน",
+          httpStatus: 404,
+        });
+      }
+      userName = user.USERNAME;
+    }
+
+    // 2) insert comment
+    const payload = {
+      jobNo,
+      typeCode,
+      typeSeq,
+      det,
+      imageNames,
+      empCode: isCustomer ? undefined : userCode,
+      userName, // undefined ได้ ไม่เป็นไร
+    };
+
+    const result = await taskModel.insertTaskComment({
+      conn,
+      payload,
+      type: isCustomer,
+    });
+    if (!result?.rowsAffected) {
+      throw new AppErrors({
+        message: "ไม่สามารถบันทึกความคิดเห็นได้",
+        httpStatus: 500,
+      });
+    }
+
+    // 3) หา operator สำหรับแสดงผล
+    const { rows: nameRows } = await taskModel.findNameComment({
+      conn,
+      userCode,
+      custSeq,
+      type: isCustomer,
+    });
+    const operator = nameRows?.[0]?.NAME_X ?? "";
+
+    // 4) prepare response
+    return {
+      comment: det,
+      date: new Date(),
+      operator,
+      isUserCode: isCustomer ? { userCode, custSeq } : { userCode },
+      imageUrls: parseMedia(imageNames),
     };
   });
 }

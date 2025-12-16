@@ -1,5 +1,6 @@
 import { computed, ref, unref, type MaybeRef } from "vue";
 import type { TaskDetail } from "@/types/task";
+import { taskApi } from "@/services/task.api";
 
 interface RatingItem {
   id: string;
@@ -86,8 +87,10 @@ export function useRatingFlow(task: MaybeRef<TaskDetail | null>) {
         id: it.id,
         score: tempRatingScores.value[it.id] ?? 0,
       }));
-      // mock API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await taskApi.rateTask({
+        jobNo: taskRef.value.id,
+        scoreList,
+      });
 
       // const sum = (
       //   tempRatingScores.value.reduce((a, b) => a + b, 0) /
@@ -106,17 +109,17 @@ export function useRatingFlow(task: MaybeRef<TaskDetail | null>) {
       }
 
       Object.assign(ratingSuccessSummary, {
-        star: Number(averageRating.value ?? 0),
-        datest: "12/12/68",
-        dateed: "12/12/68",
-        vpoint: 8,
+        star: result.data.star ?? Number(averageRating.value ?? 0),
+        datest: result.data.datest ?? "-",
+        dateed: result.data.dateed ?? "-",
+        vpoint: result.data.vPoint ?? 0,
       });
 
       ratingModalOpen.value = false;
       ratingSuccessModalOpen.value = true;
 
-      console.log("score", sum);
-      console.log("scoreList", JSON.stringify(scoreList, null, 2));
+      // console.log("score", sum);
+      // console.log("scoreList", JSON.stringify(scoreList, null, 2));
     } catch (err) {
       console.error("submitRating error:", err);
     } finally {
