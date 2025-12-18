@@ -5,18 +5,17 @@ meta {
 }
 
 get {
-  url: http://localhost:3001/api/tasks/detail?tarNo=BS68120003&userCode=00005&custSeq=27&userType=c 
+  url: http://localhost:3001/api/tasks/detail?tarNo=BS68120003&userType=c
   body: none
   auth: inherit
 }
 
 params:query {
   tarNo: BS68120003
-  userCode: 00005
-  custSeq: 27
-  userType: c 
+  userType: c
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

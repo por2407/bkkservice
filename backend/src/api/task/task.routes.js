@@ -20,8 +20,7 @@ taskRouter
   })
   .get("/detail", async (req, res, next) => {
     try {
-      const { tarNo, userType } = req.query;
-      const result = await taskService.taskDetail({ tarNo, userType });
+      const result = await taskService.taskDetail({ ...req.query });
       return res.status(200).json(result);
     } catch (e) {
       next(e);
@@ -29,11 +28,8 @@ taskRouter
   })
   .get("/time-line", async (req, res, next) => {
     try {
-      const { tarNo, userType, isCanRate } = req.query;
       const result = await taskService.taskTimeLine({
-        tarNo,
-        userType,
-        isCanRate,
+        ...req.query,
       });
       return res.status(200).json(result);
     } catch (e) {
@@ -111,8 +107,7 @@ taskRouter
   })
   .get("/task-comment", async (req, res, next) => {
     try {
-      const { jobNo, custSeq } = req.query;
-      const result = await taskService.taskComment({ jobNo, custSeq });
+      const result = await taskService.taskComment({ ...req.query });
       return res.status(200).json(result);
     } catch (e) {
       next(e);
@@ -135,4 +130,13 @@ taskRouter
         next(e);
       }
     }
-  );
+  )
+  .get("/map-location/:empcode", async (req, res, next) => {
+    try {
+      const empcode = req.params.empcode;
+      const result = await taskService.loadMap({ empCode: empcode });
+      return res.status(200).json(result);
+    } catch (e) {
+      next(e);
+    }
+  });

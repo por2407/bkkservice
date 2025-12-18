@@ -1,203 +1,214 @@
 <template>
   <div class="mt-2 flex items-center justify-between">
-    <p class="text-[11px] text-secondary-500">แตะเพื่อดูตำแหน่งของช่างบนแผนที่</p>
-    <button type="button"
+    <p class="text-[11px] text-secondary-500">
+      แตะเพื่อดูตำแหน่งของช่างบนแผนที่
+    </p>
+    <button
+      type="button"
       class="inline-flex items-center gap-1 rounded-full bg-primary-500 px-2.5 py-1 text-[11px] font-medium text-white shadow-sm active:scale-95"
-      @click.stop="openStaffLocationModal">
+      @click.stop="openStaffLocationModal"
+    >
       <MapPin class="h-3.5 w-3.5 text-white" />
       <span>ดูตำแหน่ง</span>
     </button>
   </div>
 
-  <!--(Google Maps JS API) -->
-  <ResponsiveModal :model-value="staffLocationModalOpen" @update:model-value="closeStaffLocationModal">
-    <div class="relative w-full rounded-t-3xl bg-white p-5 pb-5 shadow-lg">
-      <div class="h-[70vh] w-full max-w-md rounded-t-3xl bg-white shadow-lg sm:h-[70vh] sm:rounded-2xl">
-        <!-- header -->
-        <div class="flex items-center justify-between px-4 pt-3 pb-2">
-          <div class="flex items-center gap-2">
-            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-50">
-              <MapPin class="h-4 w-4 text-primary-600" />
-            </div>
-            <div>
+  <!-- Google Maps Modal (Mobile) -->
+  <ResponsiveModal
+    :model-value="staffLocationModalOpen"
+    @update:model-value="closeStaffLocationModal"
+  >
+    <div class="card-modal">
+      <!-- Header -->
+      <div class="mb-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100"
+          >
+            <MapPin class="h-4 w-4 text-primary-600" />
+          </div>
+          <h2 class="text-base font-semibold text-secondary-900">
+            ตำแหน่งช่างบริการ
+          </h2>
+        </div>
+        <button
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-full bg-secondary-100 text-secondary-500 active:bg-secondary-200"
+          @click="closeStaffLocationModal"
+        >
+          <X class="h-4 w-4" />
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div
+        v-if="isLoadingLocations"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <Loader2 class="h-8 w-8 animate-spin text-primary-500" />
+        <p class="mt-2 text-sm text-secondary-500">กำลังโหลดข้อมูลตำแหน่ง...</p>
+      </div>
+
+      <!-- Error State -->
+      <div
+        v-else-if="loadError"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <MapPinOff class="h-10 w-10 text-error-400" />
+        <p class="mt-2 text-sm text-error-600">{{ loadError }}</p>
+        <button
+          type="button"
+          class="btn-secondary mt-3 !w-auto !min-h-0 !py-1.5 !px-4 text-xs"
+          @click="fetchLocations"
+        >
+          ลองใหม่
+        </button>
+      </div>
+
+      <!-- No Data State -->
+      <div
+        v-else-if="!locations"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <MapPinOff class="h-10 w-10 text-secondary-300" />
+        <p class="mt-2 text-sm text-secondary-500">ไม่พบข้อมูลตำแหน่งของช่าง</p>
+      </div>
+
+      <!-- Map Display -->
+      <template v-else>
+        <!-- Employee Info Card -->
+        <div
+          v-if="selectedLocation"
+          class="mb-3 rounded-2xl border border-primary-100 bg-primary-50/50 p-3"
+        >
+          <div class="flex items-center gap-3">
+            <img
+              :src="selectedLocation.photoUrl"
+              :alt="selectedLocation.username"
+              class="h-10 w-10 rounded-full border-2 border-primary-400 object-cover"
+              @error="handleImageError"
+            />
+            <div class="flex-1">
               <p class="text-sm font-semibold text-secondary-900">
-                ตำแหน่งช่าง (เรียลไทม์)
+                {{ selectedLocation.username }}
               </p>
-              <p class="text-[11px] text-secondary-500">
-                {{ staffLocationTimeLabel }}
+              <p class="text-xs text-secondary-500">
+                รหัส: {{ selectedLocation.usercode }}
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] text-secondary-400">อัปเดตล่าสุด</p>
+              <p class="text-xs text-secondary-600">
+                {{ formatDate(selectedLocation.userdate) }}
               </p>
             </div>
           </div>
-
-          <button type="button"
-            class="flex h-8 w-8 items-center justify-center rounded-full bg-secondary-100 text-secondary-500"
-            @click="closeStaffLocationModal">
-            <X class="h-4 w-4" />
-          </button>
         </div>
 
-        <div class="h-[1px] bg-secondary-100"></div>
-
-        <!-- container ของ Google Map -->
-        <div class="h-[calc(100%-49px)] w-full">
-          <div ref="mapContainer" class="h-full w-full"></div>
-        </div>
-      </div>
+        <!-- Google Map -->
+        <GoogleMap
+          :locations="locations"
+          height="280px"
+          @marker-click="handleMarkerClick"
+        />
+      </template>
     </div>
   </ResponsiveModal>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue";
-import { MapPin, X } from "lucide-vue-next";
+import { MapPin, X, Loader2, MapPinOff, Navigation } from "lucide-vue-next";
 import ResponsiveModal from "../../../share/ResponsiveModal.vue";
+import GoogleMap from "../../../share/GoogleMap.vue";
+import { taskApi } from "@/services/task.api";
+import type { EmployeeLocation } from "@/types/task";
 
-/* ---------- type ---------- */
-
-interface StaffLocation {
-  lat: number;
-  lng: number;
-  updatedAt: string;
-}
-
-/* ---------- state ตำแหน่งช่าง ---------- */
-
-const staffLocation = ref<StaffLocation>({
-  lat: 13.7563,
-  lng: 100.5018,
-  updatedAt: new Date().toISOString(),
-});
+const props = defineProps<{
+  empCode: string;
+}>();
 
 const staffLocationModalOpen = ref(false);
+const isLoadingLocations = ref(false);
+const loadError = ref<string | null>(null);
+const locations = ref<EmployeeLocation | null>(null);
+const selectedLocation = ref<EmployeeLocation | null>(null);
 
-/* helper format เวลา (ถ้ามี util ของโปรเจกต์อยู่แล้ว สามารถเปลี่ยนมาใช้ของเดิมได้) */
-const formatUpdatedAt = (iso: string) => {
-  const d = new Date(iso);
-  return d.toLocaleString("th-TH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+/* ---------- Fetch Locations ---------- */
+const fetchLocations = async () => {
+  if (!props.empCode) {
+    loadError.value = "ไม่พบรหัสช่าง";
+    return;
+  }
+
+  try {
+    isLoadingLocations.value = true;
+    loadError.value = null;
+
+    const result = await taskApi.getMapLocation(props.empCode);
+    locations.value = result;
+
+    // Auto-select first location
+    if (result) {
+      selectedLocation.value = result;
+    }
+  } catch (err) {
+    loadError.value = "ไม่สามารถโหลดข้อมูลตำแหน่งได้";
+    console.error("Error fetching locations:", err);
+  } finally {
+    isLoadingLocations.value = false;
+  }
 };
 
-const staffLocationTimeLabel = computed(
-  () => `อัปเดตล่าสุด ${formatUpdatedAt(staffLocation.value.updatedAt)}`
-);
-
-/* ---------- map refs ---------- */
-
-const mapContainer = ref<HTMLDivElement | null>(null);
-const mapInstance = ref<any>(null);
-const staffMarker = ref<any>(null);
-
-let googleMapsLoading: Promise<void> | null = null;
-
-/* ---------- เปิด/ปิด modal ---------- */
-
+/* ---------- Open/Close Modal ---------- */
 const openStaffLocationModal = () => {
   staffLocationModalOpen.value = true;
+  fetchLocations();
 };
 
 const closeStaffLocationModal = () => {
   staffLocationModalOpen.value = false;
+  // Reset state after modal closes
+  setTimeout(() => {
+    locations.value = null;
+    selectedLocation.value = null;
+    loadError.value = null;
+  }, 300);
+};
 
-  // reset map เพื่อไม่ให้มีปัญหาเปิด-ปิดแล้วไม่ขึ้น
-  if (staffMarker.value) {
-    staffMarker.value.setMap(null);
-    staffMarker.value = null;
-  }
-  if (mapInstance.value) {
-    mapInstance.value = null;
+/* ---------- Handle Marker Click ---------- */
+const handleMarkerClick = (location: EmployeeLocation) => {
+  selectedLocation.value = location;
+};
+
+/* ---------- Select Location ---------- */
+const selectLocation = (location: EmployeeLocation) => {
+  selectedLocation.value = location;
+};
+
+/* ---------- Format Date ---------- */
+const formatDate = (dateStr: string): string => {
+  if (!dateStr) return "-";
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleString("th-TH", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateStr;
   }
 };
 
-/* ---------- โหลด Google Maps JS API ---------- */
-
-const loadGoogleMaps = (): Promise<void> => {
-  if (typeof window === "undefined") return Promise.resolve();
-
-  const g = (window as any).google;
-  if (g && g.maps) {
-    return Promise.resolve();
-  }
-
-  if (!googleMapsLoading) {
-    googleMapsLoading = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src =
-        "https://maps.googleapis.com/maps/api/js?key=AIzaSyAgf48aWg9fr48mzGvoJqKSsNINYzBhdRQ&language=th&region=TH";
-      script.async = true;
-      script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = () =>
-        reject(new Error("Google Maps JavaScript API failed to load"));
-      document.head.appendChild(script);
-    });
-  }
-
-  return googleMapsLoading;
+/* ---------- Handle Image Error ---------- */
+const handleImageError = (e: Event) => {
+  const target = e.target as HTMLImageElement;
+  const name = target.alt || "User";
+  target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    name
+  )}&background=059669&color=fff`;
 };
-
-/* ---------- init map (ปรับ UI ให้โล่ง / function น้อย) ---------- */
-
-const initMap = async () => {
-  if (!mapContainer.value) return;
-
-  await loadGoogleMaps();
-
-  const g = (window as any).google;
-  if (!g || !g.maps) return;
-
-  const { lat, lng } = staffLocation.value;
-
-  if (!mapInstance.value) {
-    mapInstance.value = new g.maps.Map(mapContainer.value, {
-      center: { lat, lng },
-      zoom: 13, // ซูมออกให้เห็นบริเวณกว้าง คล้ายรูปตัวอย่าง
-      disableDefaultUI: true, // ตัด UI มาตรฐานออกให้เรียบ
-      zoomControl: true, // เหลือแค่ปุ่มซูม
-      mapTypeControl: false,
-      fullscreenControl: false,
-      streetViewControl: false,
-      gestureHandling: "greedy",
-    });
-
-    staffMarker.value = new g.maps.Marker({
-      position: { lat, lng },
-      map: mapInstance.value,
-      title: "ตำแหน่งช่าง",
-    });
-  } else {
-    mapInstance.value.setCenter({ lat, lng });
-    if (staffMarker.value) {
-      staffMarker.value.setPosition({ lat, lng });
-    }
-  }
-};
-
-/* ---------- watch เปิด modal แล้วค่อย init map ---------- */
-
-watch(staffLocationModalOpen, async (open) => {
-  if (open) {
-    await nextTick();
-    await initMap();
-  }
-});
-
-/* ---------- watch ตำแหน่งเปลี่ยนแล้วอัปเดต marker ---------- */
-
-watch(
-  staffLocation,
-  (loc) => {
-    if (!mapInstance.value || !staffMarker.value || !loc) return;
-    const pos = { lat: loc.lat, lng: loc.lng };
-    staffMarker.value.setPosition(pos);
-    mapInstance.value.setCenter(pos);
-  },
-  { deep: true }
-);
 </script>
 
 <style scoped></style>

@@ -32,7 +32,7 @@ export const taskModel = {
   findUserName,
   insertTaskComment,
   findNameComment,
-  findUsernameByCustCodeAndCustSeq,
+  getLocation,
 };
 
 async function findCustomerInprogress({ conn, userCode, custSeq }) {
@@ -194,6 +194,7 @@ async function findDealerInprogress({ conn, userCode }) {
     s.STT_STATUS,
     s.STT_IMAGE,
     s.STT_TAR_NO,
+    nvl(s.STT_NUMDAY, '0') AS STT_NUMDAY,
     getcustnx(s.STT_CUST_CODE) AS CUSTNAME,
     CASE
         -- งานกำลังดำเนินการ
@@ -257,9 +258,13 @@ ORDER BY
   );
 }
 
-async function findDetail({ conn, tarNo, type }) {
+async function findDetail({ conn, userCode, custSeq, tarNo, type }) {
   const cols = type
     ? ` CASE 
+            WHEN  s.STT_CUST_CODE = :userCode and s.STT_CUST_SEQ = :custSeq THEN 1 
+            ELSE 2
+        END AS ORDERING
+     , CASE 
         WHEN (
                 (
                     (s.STT_STATUS IS NULL OR s.STT_STATUS <> 'Y')
@@ -294,7 +299,7 @@ async function findDetail({ conn, tarNo, type }) {
     END AS CANRATING, 
     t.BTDST_SCORE, 
     ${cols} from SV_TARM_T s ${joins} left join BK_TARDS_T t on t.BTDST_NO = s.STT_JOBNO where s.STT_TAR_NO =:tarNo`,
-    { tarNo }
+    { tarNo, ...(type ? { userCode, custSeq } : {}) }
   );
 }
 
@@ -617,7 +622,17 @@ async function updateTaskScore({ conn, jobNo, star }) {
   );
 }
 
-async function getTaskComment({ conn, jobNo, custSeq }) {
+async function getTaskComment({ conn, jobNo, custSeq, type }) {
+  const joins = type
+    ? `LEFT JOIN SV_USER_R u
+         ON u.SUR_USERNAME = t.SSDT_USERNAME
+        AND u.SUR_CUSTSEQ  = :custSeq`
+    : `JOIN SV_TARM_T tm
+         ON tm.STT_JOBNO = t.SSDT_JOB_NO
+       LEFT JOIN SV_USER_R u
+         ON u.SUR_CUSTCODE = tm.STT_CUST_CODE
+        AND u.SUR_CUSTSEQ  = tm.STT_CUST_SEQ`;
+
   return conn.execute(
     `
     SELECT
@@ -628,28 +643,15 @@ async function getTaskComment({ conn, jobNo, custSeq }) {
       t.SSDT_IMAGE,
       CASE
         WHEN t.SSDT_EMPCODE IS NOT NULL THEN getdemp(t.SSDT_EMPCODE, 'N')
-        WHEN t.SSDT_USERNAME IS NOT NULL THEN getcustdpmnx(u.SUR_CUSTCODE, :custSeq)
+        WHEN t.SSDT_USERNAME IS NOT NULL THEN getcustdpmnx(u.SUR_CUSTCODE, u.SUR_CUSTSEQ)
         ELSE NULL
       END AS NAME_X
     FROM SV_SERVICED_T t
-    LEFT JOIN SV_USER_R u
-      ON u.SUR_USERNAME = t.SSDT_USERNAME
-     AND u.SUR_CUSTSEQ  = :custSeq
-    WHERE t.SSDT_JOB_NO   = :jobNo
-    ORDER BY t.SSDT_DATE DESC
+    ${joins}
+    WHERE t.SSDT_JOB_NO = :jobNo
+    ORDER BY t.SSDT_DATE ASC
     `,
-    { jobNo, custSeq }
-  );
-}
-
-async function findUsernameByCustCodeAndCustSeq({ conn, userName }) {
-  return conn.execute(
-    `
-   SELECT SUR_CUSTCODE as USERCODE, SUR_CUSTSEQ as CUSTSEQ
-    FROM SV_USER_R
-    WHERE SUR_USERNAME =:userName
-   `,
-    { userName }
+    { jobNo, ...(type ? { custSeq } : {}) }
   );
 }
 
@@ -717,5 +719,20 @@ async function findNameComment({ conn, userCode, custSeq, type }) {
    SELECT ${cols} as NAME_X FROM dual
     `,
     { userCode, ...(type ? { custSeq } : {}) }
+  );
+}
+
+async function getLocation({ conn, empCode }) {
+  return conn.execute(
+    `
+    SELECT SLT_EMPCODE as USERCODE, 
+    getdemp(SLT_EMPCODE,'N') as USERNAME,
+    SLT_LATITUDE as USERLATI,
+    SLT_LONGITUDE as USERLONGI,
+    SLT_DATETIME as DATETIMELOC
+    FROM SV_LOCATION_T WHERE SLT_EMPCODE =:empCode 
+    ORDER BY SLT_DATETIME DESC
+    `,
+    { empCode }
   );
 }

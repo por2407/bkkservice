@@ -53,7 +53,7 @@
             step.key === 'on_the_way' &&
             status === 'in_progress' &&
             currentStep > 3
-          " />
+          " :empCode="empCode"/>
         </div>
       </div>
     </div>
@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { Check, Hourglass } from "lucide-vue-next";
-import ServiceMap from "@/components/mobile/task/detail/ServiceMap.vue";
+import ServiceMap from "@/components/web/task/detail/ServiceMap.vue";
 import { formatThaiDateTime, formatThaiDate } from "@/utils/date";
 import type { StepRuntimeInfo, TaskStatus } from "@/types/task";
 
@@ -125,6 +125,10 @@ const stepsDisplay = computed<TimelineStepView[]>(() => {
       runtime: info,
     };
   });
+});
+
+const empCode = computed(() => {
+  return props.timeline.find((step) => step.step === props.currentStep)?.empCode ?? '';
 });
 
 /* ---------------- class helper ---------------- */

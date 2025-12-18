@@ -21,7 +21,7 @@
           <p v-else class="text-xs text-secondary-400">ยังไม่มีการให้คะแนน</p>
         </div>
       </div>
-      <button v-if="!hasRatedThisTask && !isEmployee" type="button"
+      <button v-if="!hasRatedThisTask && !isEmployee && isMine" type="button"
         class="rounded-full px-3 py-1.5 text-xs font-medium shadow-sm"
         :class="hasRatedThisTask ? 'bg-primary-50 text-primary-700' : 'bg-warning-500 text-white'" :disabled="loading"
         @click="$emit('click')">
@@ -37,6 +37,7 @@ import {
 } from "lucide-vue-next";
 defineProps<{
   isEmployee: boolean;
+  isMine: boolean;
   hasRatedThisTask: boolean
   averageRating: string | null
   loading?: boolean

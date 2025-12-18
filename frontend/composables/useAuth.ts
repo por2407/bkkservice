@@ -31,7 +31,7 @@ export function useAuth() {
       } else if (user === "dealer" && pass === "dealer") {
         data = {
           userCode: "2",
-          appType: "a",
+          appType: "w",
           userType: "d",
           name: "เพชร",
         };

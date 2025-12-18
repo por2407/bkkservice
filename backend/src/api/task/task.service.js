@@ -13,6 +13,7 @@ export const taskService = {
   processJobScoringWorkflow,
   taskComment,
   saveTaskComment,
+  loadMap,
 };
 
 const LIST_TASK_BY_TYPE = {
@@ -83,7 +84,7 @@ async function taskStatuses(ctx) {
         hasVideo,
         media,
         ...(userType === "d" && row.END_SV_DATE
-          ? { endsv_job: row.END_SV_DATE }
+          ? { endsv_job: `${row.END_SV_DATE} (${row.STT_NUMDAY}วัน)` }
           : {}),
         ...(userType === "d" && row.EXHIBITION_48
           ? { eduExh48: row.EXHIBITION_48 }
@@ -98,10 +99,16 @@ async function taskStatuses(ctx) {
   });
 }
 
-async function taskDetail({ tarNo, userType }) {
-  const type = userType !== "e";
+async function taskDetail({ userCode, custSeq, tarNo, userType }) {
+  const isCustomer = userType !== "e";
   return withConnect(async (conn) => {
-    const { rows } = await taskModel.findDetail({ conn, tarNo, type });
+    const { rows } = await taskModel.findDetail({
+      conn,
+      userCode,
+      custSeq,
+      tarNo,
+      type: isCustomer,
+    });
     let data;
     const row = rows?.[0];
 
@@ -119,7 +126,7 @@ async function taskDetail({ tarNo, userType }) {
           ? {}
           : {
               dueAt: tl.SSMT_ENDJOB_DATE,
-              ...(!type ? { empCode: tl.SSMT_EMPCODE } : {}),
+              ...(!isCustomer ? { empCode: tl.SSMT_EMPCODE } : {}),
             }),
         ...(tl.SSMT_DATE_ST && tl.SSMT_DATE_ED
           ? { finishedAt: tl.SSMT_DATE_ED, operator: tl.EMP_NAME }
@@ -132,7 +139,7 @@ async function taskDetail({ tarNo, userType }) {
     ).length;
 
     const currentStep = Math.min(doneCount + 1, timelineRows.length);
-    const isSubmit = !type ? !!row.BTDST_SUBMIT_DATE : undefined;
+    const isSubmit = !isCustomer ? !!row.BTDST_SUBMIT_DATE : undefined;
 
     const files = (row.STT_IMAGE || "")
       .split(",")
@@ -157,7 +164,7 @@ async function taskDetail({ tarNo, userType }) {
     const rating = row.BTDST_SCORE ?? null;
 
     let ratingItems;
-    if (canRate && rating && type) {
+    if (canRate && rating && isCustomer) {
       const { rows: descriptionTaskScore } =
         await taskModel.customer.findDescriptionTaskScore({ conn });
       ratingItems =
@@ -169,8 +176,13 @@ async function taskDetail({ tarNo, userType }) {
         }) ?? undefined;
     }
 
+    const isMine = isCustomer
+      ? row.ORDERING === 1
+      : timelineRows.some((tl) => tl.SSMT_EMPCODE === userCode);
+
     data = {
       id: row.STT_JOBNO,
+      isMine,
       ticket: row.STT_TAR_NO,
       room: row.STT_ROOM_NO,
       description: row.STT_DET,
@@ -189,15 +201,19 @@ async function taskDetail({ tarNo, userType }) {
   });
 }
 
-async function taskTimeLine({ tarNo, userType, isCanRate }) {
-  const type = userType !== "e";
+async function taskTimeLine({ tarNo, userCode, userType, isCanRate }) {
+  const isCustomer = userType !== "e";
   return withConnect(async (conn) => {
     const timeline = [];
     let ratingItems;
 
-    const { rows } = await taskModel.getPartialInfo({ conn, tarNo, type });
+    const { rows } = await taskModel.getPartialInfo({
+      conn,
+      tarNo,
+      type: isCustomer,
+    });
     const JobNo = rows?.[0]?.STT_JOBNO;
-    const isSubmit = !type ? !!rows?.[0]?.BTDST_SUBMIT_DATE : undefined;
+    const isSubmit = !isCustomer ? !!rows?.[0]?.BTDST_SUBMIT_DATE : undefined;
     if (!JobNo)
       return {
         timeline,
@@ -205,7 +221,7 @@ async function taskTimeLine({ tarNo, userType, isCanRate }) {
         ratingItems,
       };
 
-    if ((isCanRate === "true" || isCanRate === true) && type) {
+    if ((isCanRate === "true" || isCanRate === true) && isCustomer) {
       const { rows: descriptionTaskScore } =
         await taskModel.customer.findDescriptionTaskScore({ conn });
       ratingItems =
@@ -230,7 +246,7 @@ async function taskTimeLine({ tarNo, userType, isCanRate }) {
           ? {}
           : {
               dueAt: tl.SSMT_ENDJOB_DATE,
-              ...(!type ? { empCode: tl.SSMT_EMPCODE } : {}),
+              ...(!isCustomer ? { empCode: tl.SSMT_EMPCODE } : {}),
             }),
         ...(tl.SSMT_DATE_ST && tl.SSMT_DATE_ED
           ? { finishedAt: tl.SSMT_DATE_ED, operator: tl.EMP_NAME }
@@ -238,7 +254,12 @@ async function taskTimeLine({ tarNo, userType, isCanRate }) {
       });
     }
 
+    const isMine = !isCustomer
+      ? timelineRows.some((tl) => tl.SSMT_EMPCODE === userCode)
+      : undefined;
+
     return {
+      isMine,
       timeline,
       isSubmit,
       ratingItems,
@@ -508,7 +529,8 @@ async function processJobScoringWorkflow({ data }) {
   });
 }
 
-async function taskComment({ jobNo, custSeq }) {
+async function taskComment({ jobNo, custSeq, userType }) {
+  const isCustomer = userType !== "e"; // true = ลูกค้า, false = พนักงาน
   const parseMedia = (ssdtImage, baseId) =>
     (ssdtImage ?? "")
       .split(",")
@@ -524,51 +546,21 @@ async function taskComment({ jobNo, custSeq }) {
         url: `http://localhost:3001/media_comments/${name}`,
       }));
 
-  const resolveRole = async (conn, row) => {
-    // ถ้าเป็น username = customer
-    if (row.SSDT_USERNAME) {
-      const { rows: userRows } =
-        await taskModel.findUsernameByCustCodeAndCustSeq({
-          conn,
-          userName: row.SSDT_USERNAME,
-        });
-
-      const user = userRows?.[0];
-      return {
-        role: "customer",
-        userCode: user?.USERCODE,
-        custSeq: user?.CUSTSEQ,
-      };
-    }
-
-    // ถ้าไม่มี username = operator (employee)
-    return { 
-      role: "operator",
-      userCode: row.SSDT_EMPCODE 
-    };
-  };
-
   return withTransaction(async (conn) => {
     const { rows } = await taskModel.getTaskComment({ conn, jobNo, custSeq });
 
     const data = [];
     for (const [index, row] of rows.entries()) {
-      const roleInfo = await resolveRole(conn, row);
       const commentId = `${jobNo}-comment-${index + 1}`;
 
       data.push({
         id: commentId,
         taskId: jobNo,
         author: row.NAME_X,
-        role: roleInfo.role,
+        role: row.SSDT_USERNAME ? "customer" : "operator",
         createdAt: row.DATE_COMMENT,
         message: row.SSDT_DET,
         media: parseMedia(row.SSDT_IMAGE, commentId),
-        // เก็บข้อมูลเพิ่มเติมสำหรับตรวจสอบว่าเป็นของใครในหน้า frontend
-        _userInfo: {
-          userCode: roleInfo.userCode,
-          custSeq: roleInfo.custSeq,
-        },
       });
     }
 
@@ -660,10 +652,22 @@ async function saveTaskComment({ data, userType }) {
       createdAt: new Date().toISOString(),
       message: det,
       media: parseMedia(imageNames, commentId),
-      // เก็บข้อมูลเพิ่มเติมสำหรับตรวจสอบว่าเป็นของใครในหน้า frontend
-      _userInfo: isCustomer 
-        ? { userCode, custSeq } 
-        : { userCode },
     };
+  });
+}
+
+async function loadMap({ empCode }) {
+  return withConnect(async (conn) => {
+    const { rows } = await taskModel.getLocation({ conn, empCode });
+    const r = rows?.[0];
+    const locations = {
+      lat: Number(r.USERLATI),
+      lng: Number(r.USERLONGI),
+      usercode: r.USERCODE,
+      username: r.USERNAME,
+      userdate: r.DATETIMELOC,
+      photoUrl: `http://119.46.166.102/gcs.ac.th/imagesuser/${r.USERCODE}.jpg`,
+    };
+    return locations;
   });
 }

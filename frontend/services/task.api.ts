@@ -1,4 +1,4 @@
-import type { PayLoadActive, PayLoadActiveFinish, PayLoadRate, RateResult, SaveCommentInput, TaskComment } from "@/types/task";
+import type { PayLoadActive, PayLoadActiveFinish, PayLoadRate, RateResult, SaveCommentInput, TaskComment, EmployeeLocation } from "@/types/task";
 import { useBuildPayload } from "@/composables/useBuildPayload";
 import axios, { type AxiosProgressEvent } from "axios";
 
@@ -167,5 +167,16 @@ export const taskApi = {
         onUploadProgress,
       }
     );
+  },
+
+  /**
+   * ดึงตำแหน่งของพนักงานจาก empCode
+   */
+  async getMapLocation(empCode: string) {
+    const config = useRuntimeConfig();
+    return await $fetch<EmployeeLocation>(`/api/tasks/map-location/${empCode}`, {
+      baseURL: config.public.apiBase,
+      method: "get",
+    });
   },
 };

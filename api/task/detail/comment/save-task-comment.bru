@@ -4,15 +4,33 @@ meta {
   seq: 2
 }
 
-get {
-  url: http://localhost:3001/api/tasks/task-comment?jobNo=T66090001&custSeq=32
-  body: none
+post {
+  url: http://localhost:3001/api/tasks/save-task-comment
+  body: multipartForm
   auth: inherit
 }
 
-params:query {
-  jobNo: T66090001
-  custSeq: 32
+body:json {
+  {
+    "jobNo" : "T67020003",
+    "userCode" : "00005",
+    "custSeq" : 27,
+    "det" : "เทสระบบ",
+    "typeCode": "2",
+    "typeSeq": "1",
+    "userType": "c"
+  }
+}
+
+body:multipart-form {
+  jobNo: T67020003
+  userCode: 00005
+  custSeq: 27
+  det: เทสระบบ
+  typeCode: 2
+  typeSeq: 1
+  userType: c
+  image: @file(C:\Users\HP01\Downloads\screencapture-localhost-3000-bkkservice-employee-2025-12-11-09_07_53.png)
 }
 
 settings {

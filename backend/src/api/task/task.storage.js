@@ -29,10 +29,18 @@ const multerCommentStorage = multer.diskStorage({
       const jobNo = req.body?.jobNo;
       if (!jobNo) throw new Error("jobNo is required");
 
-      const { rows } = await taskModel.getRefNoComment({ conn, jobNo });
-      const sub = rows?.[0]?.SUB;
+      // ถ้ายังไม่มี counter ให้ไปดึงจาก DB มาตั้งต้น
+      if (typeof req.commentSubCounter === "undefined") {
+        const { rows } = await taskModel.getRefNoComment({ conn, jobNo });
+        req.commentSubCounter = rows?.[0]?.SUB || 1;
+      } else {
+        // ถ้ามีแล้ว ให้บวกเพิ่ม
+        req.commentSubCounter += 1;
+      }
 
-      req.body.sub = sub; // เก็บค่า sub ไว้ใน req.body เผื่อใช้ต่อ
+      const sub = req.commentSubCounter;
+      req.body.sub = sub;
+
       return `${jobNo}_${sub}${ext}`;
     })
       .then((filename) => cb(null, filename))

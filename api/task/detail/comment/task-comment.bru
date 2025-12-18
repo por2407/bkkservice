@@ -5,11 +5,17 @@ meta {
 }
 
 get {
-  url: http:\\localhost:3001/api/task/task-comment
+  url: http://localhost:3001/api/tasks/task-comment?jobNo=T68120001&custSeq=27
   body: none
   auth: inherit
 }
 
+params:query {
+  jobNo: T68120001
+  custSeq: 27
+}
+
 settings {
   encodeUrl: true
+  timeout: 0
 }

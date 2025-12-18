@@ -2,6 +2,7 @@ export type TaskStatus = "in_progress" | "done";
 export type FilterKey = "all" | "in_progress" | "done";
 
 export interface TaskBase {
+  isMine?: boolean;
   id: string;
   ticket: string;
   room: string;
@@ -18,7 +19,6 @@ export interface TaskBase {
 }
 
 export interface Task extends TaskBase {
-  isMine?: boolean;
   schoolName?: string;
   dueDate: string;
 
@@ -118,4 +118,15 @@ export interface RateResult {
     datest: string;
     vPoint: number;
   };
+}
+
+/* ---------- Map Location types ---------- */
+
+export interface EmployeeLocation {
+  lat: number;
+  lng: number;
+  usercode: string;
+  username: string;
+  userdate: string;
+  photoUrl: string;
 }

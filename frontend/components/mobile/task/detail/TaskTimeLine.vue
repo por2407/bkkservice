@@ -52,7 +52,7 @@
             step.key === 'on_the_way' &&
             status === 'in_progress' &&
             currentStep > 3
-          " />
+          " :empCode="empCode"/>
         </div>
       </div>
     </div>
@@ -134,6 +134,10 @@ const stepsDisplay = computed<TimelineStepView[]>(() => {
   });
 });
 
+const empCode = computed(() => {
+  return props.timeline.find((step) => step.step === props.currentStep)?.empCode ?? '';
+});
+
 /* ---------------- class helper ---------------- */
 
 const bulletClass = (stepNumber: number) => {
@@ -186,6 +190,7 @@ const stepDescription = (stepNumber: number) => {
 
   return "";
 };
+
 </script>
 
 <style scoped></style>

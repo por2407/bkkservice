@@ -12,6 +12,7 @@ export const useTaskStore = defineStore("task", {
     setList(tasks: TaskBase) {
       this.list = {
         id: tasks.id ?? null,
+        isMine: tasks.isMine ?? false,
         ticket: tasks.ticket,
         room: tasks.room,
         description: tasks.description,

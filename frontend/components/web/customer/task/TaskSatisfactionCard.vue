@@ -61,7 +61,7 @@
         </div>
       </div>
       <button
-        v-if="!hasRatedThisTask && !isEmployee"
+        v-if="!hasRatedThisTask && !isEmployee && isMine"
         type="button"
         class="rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition hover:shadow-md"
         :class="
@@ -83,6 +83,7 @@ import { Star } from "lucide-vue-next";
 
 defineProps<{
   isEmployee: boolean;
+  isMine: boolean;
   hasRatedThisTask: boolean;
   averageRating: string | null;
   loading?: boolean;
